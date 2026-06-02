@@ -65,4 +65,36 @@ const SCORES = {
     },
   ],
 
+
+  "kwinana": [
+    {
+      date: "August 2026",
+      scores: {
+        "renewable-energy-generation":        2,
+        "transmission-network":               2,
+        "distribution-network":               2,
+        "energy-storage":                     3,
+        "hydrogen-network":                   2,
+        "housing":                            2,
+        "industry-decarbonisation-plans":     2,
+        "federal-emissions-commitment":       3,
+        "federal-skills-training":            3,
+        "federal-approvals":                  3,
+        "federal-investment-framework":       3,
+        "federal-rd":                         4,
+        "federal-procurement":                3,
+        "state-emissions-commitment":         2,
+        "state-skills-training":              3,
+        "state-approvals":                    4,
+        "state-investment-framework":         3,
+        "state-rd":                           4,
+        "state-procurement":                  2,
+        "lga-decarbonisation-plans":          2,
+        "strategic-nature-positive-planning": 2,
+        "wider-community-benefit-sharing":    3,
+        "effective-community-engagement":     3,
+      },
+    },
+  ],
+
 };
