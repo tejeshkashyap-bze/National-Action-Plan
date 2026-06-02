@@ -18,43 +18,70 @@
       <div class="note">Critical Success Criteria</div>
     </div>
 
+    <div id="roundSelectorBar" style="display:none; align-items:center; gap:10px; margin-bottom:14px;">
+      <label for="roundSelect" style="font-size:13px; font-weight:600; color:var(--muted); white-space:nowrap;">Assessment:</label>
+      <select id="roundSelect" style="border:1px solid var(--border); border-radius:999px; padding:5px 14px; font:inherit; font-size:13px; color:var(--text); background:#fff; cursor:pointer;">
+        <option value="">— No assessment selected —</option>
+      </select>
+    </div>
+
     <div id="grid" class="grid"></div>
   </div>
 
   <script src="data.js"></script>
   <script src="scores.js"></script>
   <script>
-    // --- City title handling ---
+    // --- City title ---
     const CITY_LABELS = {
-      "karratha": "Karratha",
-      "port-hedland": "Port Hedland",
-      "darwin": "Darwin",
-      "geraldton": "Geraldton",
-      "kwinana": "Kwinana",
-      "collie": "Collie",
-      "whyalla": "Whyalla",
-      "mt-isa": "Mt Isa",
-      "townsville": "Townsville",
-      "gladstone": "Gladstone",
+      "karratha":      "Karratha",
+      "port-hedland":  "Port Hedland",
+      "darwin":        "Darwin",
+      "geraldton":     "Geraldton",
+      "kwinana":       "Kwinana",
+      "collie":        "Collie",
+      "whyalla":       "Whyalla",
+      "mt-isa":        "Mt Isa",
+      "townsville":    "Townsville",
+      "gladstone":     "Gladstone",
       "hunter-valley": "Hunter Valley",
-      "port-kembla": "Port Kembla",
-      "geelong": "Geelong",
-      "latrobe-valley": "Latrobe Valley",
-      "portland": "Portland",
-      "bell-bay": "Bell Bay",
+      "port-kembla":   "Port Kembla",
+      "geelong":       "Geelong",
+      "latrobe-valley":"Latrobe Valley",
+      "portland":      "Portland",
+      "bell-bay":      "Bell Bay",
     };
 
-    const params = new URLSearchParams(location.search);
-    const cityKey = params.get("city") || "";
+    const params   = new URLSearchParams(location.search);
+    const cityKey  = params.get("city") || "";
     const cityName = CITY_LABELS[cityKey] || "Selected City";
 
     document.getElementById("cityTitle").textContent = cityName;
     document.title = `${cityName} – Critical Success Criteria`;
 
-    // --- Render the CSC grid (this is your previous index page content) ---
+    // --- Assessment round selector ---
+    const rounds       = (typeof SCORES !== "undefined" && SCORES[cityKey]) ? SCORES[cityKey] : [];
+    const selectorBar  = document.getElementById("roundSelectorBar");
+    const roundSelect  = document.getElementById("roundSelect");
+
+    if (rounds.length > 0) {
+      selectorBar.style.display = "flex";
+      rounds.forEach((round, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = round.date;
+        roundSelect.appendChild(opt);
+      });
+    }
+
+    roundSelect.addEventListener("change", () => {
+      const idx = roundSelect.value;
+      renderCSC(idx !== "" ? rounds[+idx].scores : {});
+    });
+
+    // --- Render grid ---
     const grid = document.getElementById("grid");
 
-    function renderCSC() {
+    function renderCSC(cityScores = {}) {
       grid.innerHTML = "";
 
       for (const pillar of CSC) {
@@ -82,9 +109,7 @@
             const a = document.createElement("a");
             a.href = `criterion.html?id=${encodeURIComponent(item.id)}&city=${encodeURIComponent(cityKey)}`;
 
-            const cityScores = (typeof SCORES !== "undefined") ? (SCORES[cityKey] || {}) : {};
             const score = cityScores[item.id];
-
             a.className = "itemLink" + (score ? ` score-${score}` : "");
 
             const label = document.createElement("span");
@@ -109,7 +134,7 @@
       }
     }
 
-    renderCSC();
+    renderCSC(); // initial render — no assessment selected, all uncoloured
   </script>
 </body>
 </html>
