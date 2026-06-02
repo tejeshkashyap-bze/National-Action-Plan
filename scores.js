@@ -12,7 +12,7 @@ const SCORES = {
 
   "hunter-valley": [
     {
-      date: "March 2026",
+      date: "April 2025",
       scores: {
         "renewable-energy-generation":    3,
         "transmission-network":           2,
@@ -39,7 +39,7 @@ const SCORES = {
 
   "gladstone": [
     {
-      date: "March 2026",
+      date: "September 2025",
       scores: {
         "renewable-energy-generation":    3,
         "transmission-network":           2,
