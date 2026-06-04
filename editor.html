@@ -81,7 +81,7 @@
       letter-spacing: 0.04em;
     }
 
-    select, input[type="text"] {
+    select, input[type="text"], input[type="password"] {
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 8px 11px;
@@ -92,10 +92,16 @@
       width: 100%;
     }
 
-    select:focus, input[type="text"]:focus {
+    select:focus, input[type="text"]:focus, input[type="password"]:focus {
       outline: 2px solid var(--header);
       outline-offset: 1px;
       border-color: transparent;
+    }
+
+    .field-hint {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
     }
 
     .date-pair { display: flex; gap: 8px; }
@@ -214,8 +220,8 @@
 
     .add-para-btn:hover { background: #f0f8ff; border-color: var(--header); }
 
-    /* ── Generate button ── */
-    .generate-btn {
+    /* ── Save button ── */
+    .save-btn {
       width: 100%;
       background: var(--header);
       color: #fff;
@@ -227,93 +233,82 @@
       font-weight: 700;
       cursor: pointer;
       margin-bottom: 20px;
-    }
-
-    .generate-btn:hover { background: #155d8f; }
-
-    /* ── Output ── */
-    .output-section { display: none; }
-    .output-section.visible { display: block; }
-
-    .output-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px 24px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
-    }
-
-    .output-top {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
+      justify-content: center;
+      gap: 10px;
     }
 
-    .output-fname {
-      font-family: monospace;
+    .save-btn:hover:not(:disabled) { background: #155d8f; }
+    .save-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .save-btn.saving .spinner { display: block; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Status box ── */
+    .status-box {
+      border-radius: 10px;
+      padding: 14px 18px;
       font-size: 14px;
-      font-weight: 700;
-      color: var(--header);
-    }
-
-    .copy-btn {
-      background: #e8f4fd;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 5px 14px;
-      font: inherit;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--header);
-      cursor: pointer;
-    }
-
-    .copy-btn:hover { background: #d0eafb; }
-    .copy-btn.ok { background: #d4edda; color: #155724; border-color: #c3e6cb; }
-
-    .output-note {
-      font-size: 13px;
-      color: var(--muted);
       line-height: 1.5;
-      margin: 0 0 10px;
-    }
-
-    .output-code {
-      background: #f6fbff;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-family: monospace;
-      font-size: 12px;
-      white-space: pre-wrap;
-      word-break: break-word;
-      line-height: 1.6;
-      max-height: 380px;
-      overflow-y: auto;
-    }
-
-    .error-msg {
-      background: #fdf0f0;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       display: none;
     }
 
-    .error-msg.visible { display: block; }
+    .status-box.success {
+      display: block;
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
+    .status-box.error {
+      display: block;
+      background: #fdf0f0;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
   </style>
 </head>
 <body>
 <div class="container">
 
   <h1>BZE Assessment Editor</h1>
-  <p class="subtitle">Fill in the fields below for a single criterion assessment, then click <strong>Generate Snippets</strong>.<br>
-  Copy each snippet and paste it into the indicated location in the relevant data file.</p>
+  <p class="subtitle">Fill in the details below for a single criterion assessment, then click <strong>Save to GitHub</strong>.<br>
+  The scores and evidence files in the repository will be updated automatically.</p>
+
+  <!-- ── 0. GitHub Settings ────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">GitHub Settings</div>
+    <div class="row">
+      <div class="field">
+        <label for="repoInput">Repository</label>
+        <input type="text" id="repoInput" placeholder="owner/repo" />
+      </div>
+      <div class="field">
+        <label for="branchInput">Branch</label>
+        <input type="text" id="branchInput" placeholder="main" />
+      </div>
+    </div>
+    <div class="row">
+      <div class="field" style="grid-column: 1/-1">
+        <label for="tokenInput">Personal Access Token</label>
+        <input type="password" id="tokenInput" placeholder="ghp_…" autocomplete="off" />
+        <span class="field-hint">Needs <strong>Contents: Read &amp; Write</strong> permission. Saved in your browser's local storage.</span>
+      </div>
+    </div>
+  </div>
 
   <!-- ── 1. Details ───────────────────────────────────────────────────── -->
   <div class="card">
@@ -362,32 +357,13 @@
     <button class="add-para-btn" onclick="addParagraph()">+ Add paragraph</button>
   </div>
 
-  <!-- ── Generate ─────────────────────────────────────────────────────── -->
-  <div class="error-msg" id="errorMsg"></div>
-  <button class="generate-btn" onclick="generate()">Generate Snippets</button>
+  <!-- ── Save ─────────────────────────────────────────────────────────── -->
+  <div class="status-box" id="statusBox"></div>
+  <button class="save-btn" id="saveBtn" onclick="saveToGitHub()">
+    <span class="spinner"></span>
+    <span id="saveBtnLabel">Save to GitHub</span>
+  </button>
 
-  <!-- ── Output ───────────────────────────────────────────────────────── -->
-  <div class="output-section" id="outputSection">
-
-    <div class="output-card">
-      <div class="output-top">
-        <span class="output-fname" id="evidenceFname">evidence-kwinana.js</span>
-        <button class="copy-btn" id="copyEvidenceBtn" onclick="copyCode('evidenceCode','copyEvidenceBtn')">Copy</button>
-      </div>
-      <p class="output-note" id="evidenceNote"></p>
-      <div class="output-code" id="evidenceCode"></div>
-    </div>
-
-    <div class="output-card">
-      <div class="output-top">
-        <span class="output-fname">scores.js</span>
-        <button class="copy-btn" id="copyScoresBtn" onclick="copyCode('scoresCode','copyScoresBtn')">Copy</button>
-      </div>
-      <p class="output-note" id="scoresNote"></p>
-      <div class="output-code" id="scoresCode"></div>
-    </div>
-
-  </div>
 </div><!-- /container -->
 
 <script src="data.js"></script>
@@ -582,6 +558,7 @@ function init() {
 
   refreshScale();
   addParagraph();
+  loadSettings();
 }
 
 // ── Score buttons ──────────────────────────────────────────────────────────
@@ -660,20 +637,164 @@ function renumber() {
   });
 }
 
-// ── Generate ───────────────────────────────────────────────────────────────
+// ── GitHub Settings ────────────────────────────────────────────────────────
 
-function generate() {
-  hideError();
+function loadSettings() {
+  document.getElementById("repoInput").value   = localStorage.getItem("ghRepo")   || "mattmckee-BZE/National-Action-Plan";
+  document.getElementById("branchInput").value = localStorage.getItem("ghBranch") || "main";
+  document.getElementById("tokenInput").value  = localStorage.getItem("ghToken")  || "";
+}
 
-  const cityKey   = document.getElementById("citySelect").value;
-  const indId     = document.getElementById("indicatorSelect").value;
-  const month     = document.getElementById("monthSelect").value;
-  const year      = document.getElementById("yearSelect").value;
-  const date      = `${month} ${year}`;
+function saveSettings() {
+  localStorage.setItem("ghRepo",   document.getElementById("repoInput").value.trim());
+  localStorage.setItem("ghBranch", document.getElementById("branchInput").value.trim());
+  localStorage.setItem("ghToken",  document.getElementById("tokenInput").value.trim());
+}
 
-  if (!selectedScore) { showError("Please select a score (1–5)."); return; }
+function getSettings() {
+  const repo  = document.getElementById("repoInput").value.trim();
+  const slash = repo.indexOf("/");
+  return {
+    owner:  slash >= 0 ? repo.slice(0, slash) : repo,
+    repo:   slash >= 0 ? repo.slice(slash + 1) : repo,
+    branch: document.getElementById("branchInput").value.trim() || "main",
+    token:  document.getElementById("tokenInput").value.trim(),
+  };
+}
 
-  // Build grading scale HTML (raw — jsLit will escape it for JS output)
+// ── Base64 helpers (UTF-8 safe) ────────────────────────────────────────────
+
+function b64Decode(b64) {
+  const bytes = Uint8Array.from(atob(b64.replace(/\s/g, "")), c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function b64Encode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  bytes.forEach(b => (bin += String.fromCharCode(b)));
+  return btoa(bin);
+}
+
+// ── GitHub Contents API ────────────────────────────────────────────────────
+
+async function ghGet(path) {
+  const { owner, repo, branch, token } = getSettings();
+  const res = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`,
+    { headers: { Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json" } }
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`GitHub ${res.status}: ${body}`);
+  }
+  return res.json();
+}
+
+async function ghPut(path, content, sha, message) {
+  const { owner, repo, branch, token } = getSettings();
+  const payload = { message, content: b64Encode(content), branch };
+  if (sha) payload.sha = sha;
+  const res = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: "application/vnd.github.v3+json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`GitHub ${res.status}: ${body}`);
+  }
+  return res.json();
+}
+
+// ── Parse & serialize JS data files ───────────────────────────────────────
+
+function parseScores(js) {
+  const objPart = js
+    .replace(/^[\s\S]*?\bSCORES\s*=\s*/, "")
+    .replace(/;\s*$/, "")
+    .trim();
+  return new Function(`"use strict"; return (${objPart});`)();
+}
+
+function parseEvidence(js) {
+  const fakeWindow = {};
+  new Function("window", `"use strict"; ${js}`)(fakeWindow);
+  return fakeWindow.CITY_EVIDENCE || {};
+}
+
+const SCORES_HEADER =
+`// scores.js — Assessment scores per city, organised by round.
+//
+// Each city maps to an array of rounds (newest first). Each round has a
+// human-readable date and a scores object: item IDs (from data.js) → 1–5.
+// Omit an indicator to leave its box unscored.
+
+`;
+
+function serializeScores(data) {
+  return SCORES_HEADER + "const SCORES = " + JSON.stringify(data, null, 2) + ";\n";
+}
+
+function serializeEvidence(data) {
+  return "window.CITY_EVIDENCE = " + JSON.stringify(data, null, 2) + ";\n";
+}
+
+// ── Merge helpers ──────────────────────────────────────────────────────────
+
+function mergeScore(scores, cityKey, date, indId, score) {
+  if (!scores[cityKey]) scores[cityKey] = [];
+  const rounds = scores[cityKey];
+  const idx = rounds.findIndex(r => r.date === date);
+  if (idx >= 0) {
+    rounds[idx].scores[indId] = score;
+  } else {
+    rounds.unshift({ date, scores: { [indId]: score } });
+  }
+}
+
+function mergeEvidence(evidence, indId, date, score, paragraphs) {
+  if (!evidence[indId]) evidence[indId] = [];
+  const rounds = evidence[indId];
+  const idx = rounds.findIndex(r => r.date === date);
+  if (idx >= 0) {
+    rounds[idx] = { date, score, paragraphs };
+  } else {
+    rounds.unshift({ date, score, paragraphs });
+  }
+}
+
+// ── Save to GitHub ─────────────────────────────────────────────────────────
+
+async function saveToGitHub() {
+  hideStatus();
+
+  const { token, owner, repo } = getSettings();
+  if (!owner || !repo || !token) {
+    showStatus("error", "Please fill in the GitHub repository and personal access token.");
+    return;
+  }
+
+  const cityKey = document.getElementById("citySelect").value;
+  const indId   = document.getElementById("indicatorSelect").value;
+  const month   = document.getElementById("monthSelect").value;
+  const year    = document.getElementById("yearSelect").value;
+  const date    = `${month} ${year}`;
+
+  if (!selectedScore) {
+    showStatus("error", "Please select a score (1–5).");
+    return;
+  }
+
+  // Build grading scale HTML
   const scaleItems = [];
   for (let i = 1; i <= 5; i++) {
     const txt = document.getElementById(`scale${i}`).value.trim();
@@ -684,102 +805,88 @@ function generate() {
     `<ul class="bulletList" style="margin-top:6px">${scaleItems.join("")}</ul>`;
 
   // Collect Quill paragraphs (skip empty)
-  const paras = [scaleHtml];
+  const paragraphs = [scaleHtml];
   for (const { quill } of quilts) {
     const raw = quill.root.innerHTML.trim();
     if (!raw || raw === "<p><br></p>") continue;
-    paras.push(normaliseQuillHtml(raw));
+    paragraphs.push(normaliseQuillHtml(raw));
   }
 
-  if (paras.length < 2) {
-    showError("Please add at least one assessment paragraph.");
+  if (paragraphs.length < 2) {
+    showStatus("error", "Please add at least one assessment paragraph.");
     return;
   }
 
-  // ── Snippet 1: evidence file ──
-  const parasJs = paras.map(p => `        ${jsLit(p)},`).join("\n");
-  const evidenceSnippet =
-`{
-  date: ${jsLit(date)},
-  score: ${selectedScore},
-  paragraphs: [
-${parasJs}
-  ]
-},`;
+  saveSettings();
+  setSaving(true);
 
-  const evidenceFile = `evidence-${cityKey}.js`;
+  try {
+    // ── 1. scores.js ──
+    const scoresFile = await ghGet("scores.js");
+    if (!scoresFile) throw new Error("scores.js was not found in the repository. Check the repo and branch settings.");
+    const scores = parseScores(b64Decode(scoresFile.content));
+    mergeScore(scores, cityKey, date, indId, selectedScore);
+    await ghPut("scores.js", serializeScores(scores), scoresFile.sha,
+      `Update score: ${cityKey} / ${indId} (${date})`);
 
-  document.getElementById("evidenceFname").textContent = evidenceFile;
-  document.getElementById("evidenceNote").textContent =
-    `In ${evidenceFile}, find CITY_EVIDENCE["${indId}"] and prepend this object at the top of the array. ` +
-    `If that key doesn't exist yet, create it: "${indId}": [ <paste here> ],`;
-  document.getElementById("evidenceCode").textContent = evidenceSnippet;
+    // ── 2. evidence-{city}.js ──
+    const evPath = `evidence-${cityKey}.js`;
+    const evFile = await ghGet(evPath);
+    const evidence = evFile ? parseEvidence(b64Decode(evFile.content)) : {};
+    mergeEvidence(evidence, indId, date, selectedScore, paragraphs);
+    await ghPut(evPath, serializeEvidence(evidence), evFile ? evFile.sha : undefined,
+      `Update evidence: ${cityKey} / ${indId} (${date})`);
 
-  // ── Snippet 2: scores file ──
-  const scoresSnippet = `"${indId}": ${selectedScore},`;
-
-  document.getElementById("scoresNote").textContent =
-    `In scores.js, find the "${cityKey}" city. ` +
-    `If a "${date}" round already exists, add this line inside its scores: { … } object. ` +
-    `If "${date}" is a new round, prepend a new { date: "${date}", scores: { … } } object to the array and include this line inside it.`;
-  document.getElementById("scoresCode").textContent = scoresSnippet;
-
-  const out = document.getElementById("outputSection");
-  out.classList.add("visible");
-  out.scrollIntoView({ behavior: "smooth" });
+    showStatus("success",
+      `Saved successfully. <strong>${CITY_LABELS[cityKey]}</strong> — ` +
+      `<em>${indId}</em> scored <strong>${selectedScore}</strong> for <strong>${date}</strong>. ` +
+      `Two commits pushed to <code>${document.getElementById("branchInput").value.trim() || "main"}</code>.`
+    );
+  } catch (err) {
+    showStatus("error", "Save failed: " + err.message);
+  } finally {
+    setSaving(false);
+  }
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── UI helpers ─────────────────────────────────────────────────────────────
 
-// Serialise a raw string as a JS double-quoted string literal.
-function jsLit(str) {
-  return '"' + str
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/\r?\n/g, "\\n")
-  + '"';
+function setSaving(active) {
+  const btn = document.getElementById("saveBtn");
+  const lbl = document.getElementById("saveBtnLabel");
+  btn.disabled = active;
+  btn.classList.toggle("saving", active);
+  lbl.textContent = active ? "Saving…" : "Save to GitHub";
+}
+
+function showStatus(type, html) {
+  const box = document.getElementById("statusBox");
+  box.className = `status-box ${type}`;
+  box.innerHTML = html;
+  box.scrollIntoView({ behavior: "smooth" });
+}
+
+function hideStatus() {
+  const box = document.getElementById("statusBox");
+  box.className = "status-box";
+  box.innerHTML = "";
+}
+
+function escHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 }
 
 // If a Quill block is a single plain <p>…</p>, unwrap it so previous.html
 // applies its sectionText class. Lists and multi-block HTML stay as-is.
 function normaliseQuillHtml(html) {
   const trimmed = html.trim();
-  // Single <p> with no nested block elements
   if (trimmed.startsWith("<p>") && trimmed.endsWith("</p>")) {
     const inner = trimmed.slice(3, -4);
-    // Only unwrap if there are no other block-level tags inside
     if (!/<(p|ul|ol|li|blockquote|div|h[1-6])[>\s]/i.test(inner)) {
       return inner;
     }
   }
   return trimmed;
-}
-
-// Escape characters that would break an HTML attribute value
-function escHtml(str) {
-  return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-}
-
-function showError(msg) {
-  const el = document.getElementById("errorMsg");
-  el.textContent = msg;
-  el.classList.add("visible");
-  el.scrollIntoView({ behavior: "smooth" });
-}
-
-function hideError() {
-  document.getElementById("errorMsg").classList.remove("visible");
-}
-
-function copyCode(codeId, btnId) {
-  const text = document.getElementById(codeId).textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById(btnId);
-    const orig = btn.textContent;
-    btn.textContent = "Copied!";
-    btn.classList.add("ok");
-    setTimeout(() => { btn.textContent = orig; btn.classList.remove("ok"); }, 2000);
-  });
 }
 
 // ── Start ──────────────────────────────────────────────────────────────────
