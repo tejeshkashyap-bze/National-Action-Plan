@@ -23,7 +23,9 @@
     const city   = params.get("city") || "";
 
     const backLink = document.getElementById("backLink");
-    backLink.href = `criterion.html?id=${encodeURIComponent(id || "")}${city ? `&city=${encodeURIComponent(city)}` : ""}`;
+    backLink.href = city
+      ? `criterion.html?id=${encodeURIComponent(id || "")}&city=${encodeURIComponent(city)}`
+      : "CSC.html";
 
     const content = document.getElementById("content");
 
