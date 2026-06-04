@@ -107,9 +107,10 @@
 
           for (const item of group.items) {
             const a = document.createElement("a");
-            a.href = `criterion.html?id=${encodeURIComponent(item.id)}&city=${encodeURIComponent(cityKey)}`;
-
             const score = cityScores[item.id];
+            a.href = score
+              ? `previous.html?id=${encodeURIComponent(item.id)}&city=${encodeURIComponent(cityKey)}`
+              : `criterion.html?id=${encodeURIComponent(item.id)}&city=${encodeURIComponent(cityKey)}`;
             a.className = "itemLink" + (score ? ` score-${score}` : "");
 
             const label = document.createElement("span");
