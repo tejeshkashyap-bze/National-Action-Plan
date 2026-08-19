@@ -1,0 +1,107 @@
+<!doctype html>
+<!-- concept: editorial home — smaller logo, real headline, cards carry a line of explanation -->
+<!-- replaces: index.html -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Home — editorial concept</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    /* Concept-only overrides. Nothing here touches the real site. */
+    .cWrap{ max-width: 1000px; margin: 0 auto; padding: 40px 22px 70px; }
+
+    .cMast{
+      display: flex; align-items: center; gap: 16px;
+      padding-bottom: 20px; border-bottom: 1px solid var(--border);
+    }
+    .cMast img{ height: 54px; width: auto; display: block; }
+    .cMast .org{ font-size: 12.5px; font-weight: 700; letter-spacing: .08em;
+                  text-transform: uppercase; color: var(--header); }
+
+    .cHero{ padding: 40px 0 34px; max-width: 62ch; }
+    .cHero h1{
+      font-size: clamp(30px, 4.4vw, 46px); line-height: 1.1;
+      letter-spacing: -.02em; margin: 0 0 14px; font-weight: 800;
+    }
+    .cHero p{ font-size: 16.5px; line-height: 1.6; color: var(--muted); margin: 0; }
+
+    .cNav{ display: grid; gap: 12px; grid-template-columns: 1fr; }
+    .cCard{
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 18px;
+      text-decoration: none; color: var(--text);
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px 22px;
+      transition: border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+    }
+    .cCard:hover{
+      border-color: var(--header); transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(31,111,167,.13);
+    }
+    .cCard h2{ font-size: 19px; margin: 0 0 5px; font-weight: 750; letter-spacing: -.01em; }
+    .cCard p{ margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.5; max-width: 54ch; }
+    .cArrow{
+      width: 34px; height: 34px; border-radius: 999px; flex: none;
+      background: #eef6fb; color: var(--header);
+      display: grid; place-items: center; font-size: 15px; font-weight: 700;
+      transition: background 140ms ease, color 140ms ease, transform 140ms ease;
+    }
+    .cCard:hover .cArrow{ background: var(--header); color: #fff; transform: translateX(3px); }
+
+    .cFoot{
+      margin-top: 42px; padding-top: 18px; border-top: 1px solid var(--border);
+      display: flex; gap: 14px; flex-wrap: wrap; align-items: baseline;
+      font-size: 12.5px; color: var(--muted);
+    }
+    .cFoot .ver{ margin-left: auto; }
+  </style>
+</head>
+<body>
+  <div class="cWrap">
+    <header class="cMast">
+      <img src="../BZE%20Logo%20PNG.png" alt="Beyond Zero Emissions" />
+      <span class="org">Beyond Zero Emissions</span>
+    </header>
+
+    <div class="cHero">
+      <h1>The National Action Plan</h1>
+      <p>A shared assessment of what each of Australia's industrial regions needs to
+      decarbonise — the criteria, the evidence behind them, and where every region
+      stands today.</p>
+    </div>
+
+    <nav class="cNav">
+      <a class="cCard" href="../map.html">
+        <div>
+          <h2>Industrial Locations</h2>
+          <p>Sixteen regions across Australia. Open one to see how it scores against
+          every criterion.</p>
+        </div>
+        <span class="cArrow" aria-hidden="true">→</span>
+      </a>
+
+      <a class="cCard" href="../CSC.html">
+        <div>
+          <h2>National Action Plan Criteria</h2>
+          <p>The five pillars and their indicators, with the methodology and data
+          sources behind each one.</p>
+        </div>
+        <span class="cArrow" aria-hidden="true">→</span>
+      </a>
+
+      <a class="cCard" href="../contributors.html">
+        <div>
+          <h2>Contributors</h2>
+          <p>The researchers, partners and reviewers who built the assessment.</p>
+        </div>
+        <span class="cArrow" aria-hidden="true">→</span>
+      </a>
+    </nav>
+
+    <footer class="cFoot">
+      <span>BZE's National Action Plan is made possible through your generous donations.</span>
+      <span class="ver">Regional Assessment Process · Version 2 · March 2026</span>
+    </footer>
+  </div>
+</body>
+</html>

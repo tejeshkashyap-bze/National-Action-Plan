@@ -1,0 +1,16 @@
+{
+  "name": "National-Action-Plan",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BZE National Action Plan – clickable prototype. Plain HTML/CSS/JS; the tooling below is design-cycle only and is not needed to deploy.",
+  "scripts": {
+    "dev": "node review/server.mjs",
+    "start": "node review/server.mjs --open",
+    "dev:noreview": "node review/server.mjs --no-review",
+    "review:show": "node review/server.mjs --print-comments",
+    "review:normalise": "node review/server.mjs --normalise"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
