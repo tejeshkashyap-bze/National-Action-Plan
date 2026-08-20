@@ -33,12 +33,6 @@ const SCORES = {
   ],
   "gladstone": [
     {
-      "date": "June 2026",
-      "scores": {
-        "public-finance-commitment": 1
-      }
-    },
-    {
       "date": "September 2025",
       "scores": {
         "renewable-energy-generation": 3,

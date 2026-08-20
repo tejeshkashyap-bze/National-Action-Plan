@@ -303,15 +303,5 @@ window.CITY_EVIDENCE = {
         "First Nations community benefit sharing and perspectives on land-use prioritisation should be further considered in this or an alternative indicator. Public data sets are not readily available but conversations and pilot projects to incorporate First Nations perspectives are welcome and essential. It is important to spur progress towards ensuring First Nations communities have a say in and share the benefits of projects on the land that they have traditional connections to."
       ]
     }
-  ],
-  "public-finance-commitment": [
-    {
-      "date": "June 2026",
-      "score": 1,
-      "paragraphs": [
-        "<strong>Indicator grading scale</strong><ul class=\"bulletList\" style=\"margin-top:6px\"><li><strong>1</strong> – </li><li><strong>2</strong> – </li><li><strong>3</strong> – </li><li><strong>4</strong> – </li><li><strong>5</strong> – </li></ul>",
-        "Test Test"
-      ]
-    }
   ]
 };
