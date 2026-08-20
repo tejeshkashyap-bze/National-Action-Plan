@@ -1,0 +1,858 @@
+<!doctype html>
+<!-- concept: Bold, tool-led direction. Treats the NAP as an assessment console rather than a
+     brochure: left rail, a region x indicator score matrix on a validated diverging ramp,
+     coverage and distribution tiles, a table view for accessibility, and a slide-in indicator
+     drawer. Dark by default with a light toggle. -->
+<!-- replaces: index.html, CSC.html, city.html, criterion.html, editor.html -->
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Concept B — Console · BZE National Action Plan</title>
+<style>
+:root{
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --r:8px;
+}
+/* ---- dark (default) ---- */
+:root[data-theme="dark"]{
+  --bg:#0d1319; --surface:#141b22; --surface-2:#1b242d; --raised:#212c36;
+  --line:#2a3641; --line-soft:#212c36;
+  --ink:#eef3f7; --ink-2:#a3b3c0; --ink-3:#74858f;
+  --accent:#3e9cd3; --accent-2:#8fc9ea;
+  --v1:#f37d72; --v2:#93332e; --v3:#383c42; --v4:#2d6ab0; --v5:#5ba0ec;
+  --v1t:#2b0f0c; --v2t:#ffffff; --v3t:#e6e8ea; --v4t:#ffffff; --v5t:#06203f;
+  --none:#1b242d; --noneT:#5d6d78;
+}
+/* ---- light ---- */
+:root[data-theme="light"]{
+  --bg:#f4f6f8; --surface:#ffffff; --surface-2:#f7fafc; --raised:#ffffff;
+  --line:#dde5ec; --line-soft:#eaf0f5;
+  --ink:#0f1c26; --ink-2:#4d616f; --ink-3:#7d8f9a;
+  --accent:#127cbf; --accent-2:#0d5a8c;
+  --v1:#a83029; --v2:#e0796c; --v3:#dcdbd6; --v4:#5598e7; --v5:#1c5cab;
+  --v1t:#ffffff; --v2t:#2b1210; --v3t:#26251f; --v4t:#0a2a52; --v5t:#ffffff;
+  --none:#eef2f5; --noneT:#93a3ad;
+}
+*{box-sizing:border-box}
+html,body{margin:0; height:100%}
+body{font-family:var(--sans); background:var(--bg); color:var(--ink);
+     font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased}
+button{font:inherit; cursor:pointer; color:inherit}
+
+.app{display:grid; grid-template-columns:236px 1fr; min-height:100vh}
+@media (max-width:900px){ .app{grid-template-columns:1fr} .rail{display:none} }
+
+/* ---------- rail ---------- */
+.rail{background:var(--surface); border-right:1px solid var(--line); padding:18px 14px;
+      display:flex; flex-direction:column; gap:22px; position:sticky; top:0; height:100vh;
+      overflow-y:auto}
+.brand{display:flex; align-items:center; gap:9px; padding:0 6px 4px}
+.brandDot{width:22px;height:22px;border-radius:6px;flex:none;
+          background:linear-gradient(135deg,var(--accent-2),var(--accent))}
+.brandT{font-size:13px; font-weight:700; letter-spacing:-.01em; line-height:1.2}
+.brandT small{display:block; font-weight:500; color:var(--ink-3); font-size:11px;
+              letter-spacing:.02em}
+.railGrp{display:grid; gap:1px}
+.railLbl{font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+         color:var(--ink-3); padding:0 6px 8px}
+.railBtn{width:100%; text-align:left; background:none; border:0; padding:7px 8px;
+         border-radius:6px; font-size:13px; color:var(--ink-2); display:flex;
+         align-items:center; gap:9px}
+.railBtn:hover{background:var(--surface-2); color:var(--ink)}
+.railBtn[aria-current="true"]{background:var(--raised); color:var(--ink); font-weight:600}
+.railBtn .tag{margin-left:auto; font-size:10.5px; color:var(--ink-3);
+              font-variant-numeric:tabular-nums}
+.pip{width:6px;height:6px;border-radius:50%;flex:none;background:var(--ink-3)}
+.pip[data-s="published"]{background:var(--accent)}
+.pip[data-s="underway"]{background:#e0a132}
+.pip[data-s="none"]{background:var(--line)}
+.railFoot{margin-top:auto; font-size:11px; color:var(--ink-3); padding:0 6px}
+.toggle{display:flex; gap:2px; background:var(--surface-2); border-radius:7px; padding:2px;
+        margin:10px 6px 0}
+.toggle button{flex:1; border:0; background:none; padding:5px; border-radius:5px;
+               font-size:11.5px; color:var(--ink-3)}
+.toggle button[aria-pressed="true"]{background:var(--raised); color:var(--ink); font-weight:600}
+
+/* ---------- main ---------- */
+.head{padding:26px 30px 0; display:flex; align-items:flex-start; gap:24px; flex-wrap:wrap}
+h1{font-size:26px; letter-spacing:-.022em; margin:0 0 6px; font-weight:700}
+.sub{font-size:13.5px; color:var(--ink-2); max-width:70ch; margin:0}
+.body{padding:22px 30px 60px}
+
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px;
+       margin-bottom:22px}
+.tileC{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+       padding:15px 16px}
+.tileL{font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+       color:var(--ink-3); margin-bottom:10px}
+.tileV{font-size:30px; font-weight:700; letter-spacing:-.03em; line-height:1}
+.tileV small{font-size:14px; font-weight:500; color:var(--ink-3); letter-spacing:0}
+.tileM{font-size:11.5px; color:var(--ink-3); margin-top:7px}
+.bars{display:flex; gap:3px; align-items:flex-end; height:34px; margin-top:4px}
+.bar{flex:1; border-radius:3px 3px 0 0; min-height:2px; position:relative}
+.barX{display:flex; gap:3px; margin-top:5px}
+.barX span{flex:1; text-align:center; font-size:10px; color:var(--ink-3);
+           font-variant-numeric:tabular-nums}
+.progress{height:6px; border-radius:3px; background:var(--none); overflow:hidden; margin-top:12px}
+.progress i{display:block; height:100%; background:var(--accent); border-radius:3px}
+
+/* ---------- toolbar ---------- */
+.bar2{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px}
+.seg{display:flex; gap:2px; background:var(--surface); border:1px solid var(--line);
+     border-radius:7px; padding:2px}
+.seg button{border:0; background:none; padding:6px 11px; border-radius:5px; font-size:12.5px;
+            color:var(--ink-3)}
+.seg button[aria-pressed="true"]{background:var(--raised); color:var(--ink); font-weight:600}
+.legend{display:flex; align-items:center; gap:12px; margin-left:auto; flex-wrap:wrap;
+        font-size:11.5px; color:var(--ink-3)}
+.lSw{width:22px;height:14px;border-radius:3px;display:inline-grid;place-items:center;
+     font-size:9.5px; font-weight:700; margin-right:5px; vertical-align:-2px}
+
+/* ---------- matrix ---------- */
+.mWrap{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+       overflow:auto}
+table{border-collapse:separate; border-spacing:0; width:100%; min-width:660px}
+thead th{position:sticky; top:0; background:var(--surface); z-index:3;
+         border-bottom:1px solid var(--line); padding:11px 10px; text-align:left;
+         font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+         color:var(--ink-3); white-space:nowrap}
+thead th.num{text-align:center; width:104px}
+tbody td{border-bottom:1px solid var(--line-soft); padding:0}
+tbody tr:last-child td{border-bottom:0}
+.pRow td{background:var(--surface-2); padding:9px 12px; font-size:11px; font-weight:700;
+         letter-spacing:.09em; text-transform:uppercase; color:var(--accent-2)}
+.gRow td{padding:8px 12px 6px 22px; font-size:11.5px; font-weight:600; color:var(--ink-3);
+         letter-spacing:.02em}
+.iCell{padding:0}
+.iBtn{width:100%; text-align:left; background:none; border:0; padding:9px 12px 9px 22px;
+      font-size:13px; line-height:1.35; color:var(--ink)}
+.iBtn:hover{color:var(--accent-2); text-decoration:underline; text-underline-offset:3px}
+.cell{width:104px; text-align:center; padding:4px 6px}
+.cellIn{display:block; width:100%; height:30px; border:0; border-radius:5px;
+        font-size:13px; font-weight:700; font-variant-numeric:tabular-nums;
+        display:grid; place-items:center; position:relative}
+.cellIn:hover{outline:2px solid var(--accent); outline-offset:1px}
+.cellIn[data-v="1"]{background:var(--v1); color:var(--v1t)}
+.cellIn[data-v="2"]{background:var(--v2); color:var(--v2t)}
+.cellIn[data-v="3"]{background:var(--v3); color:var(--v3t)}
+.cellIn[data-v="4"]{background:var(--v4); color:var(--v4t)}
+.cellIn[data-v="5"]{background:var(--v5); color:var(--v5t)}
+.cellIn[data-v="0"]{background:var(--none); color:var(--noneT); font-weight:500}
+
+.tipBox{position:fixed; z-index:60; pointer-events:none; background:var(--raised);
+        border:1px solid var(--line); border-radius:7px; padding:9px 11px; font-size:12px;
+        box-shadow:0 12px 30px rgba(0,0,0,.35); max-width:250px; display:none}
+.tipBox b{display:block; margin-bottom:3px; font-size:12.5px}
+.tipBox em{font-style:normal; color:var(--ink-3)}
+
+/* ---------- drawer ---------- */
+.scrim{position:fixed; inset:0; background:rgba(4,8,12,.55); z-index:40; display:none}
+.scrim.on{display:block}
+.drawer{position:fixed; top:0; right:0; height:100%; width:min(460px,92vw); z-index:50;
+        background:var(--surface); border-left:1px solid var(--line);
+        transform:translateX(100%); transition:transform .22s cubic-bezier(.4,0,.2,1);
+        display:flex; flex-direction:column}
+.drawer.on{transform:none}
+.dHead{padding:20px 22px 16px; border-bottom:1px solid var(--line)}
+.dKick{font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+       color:var(--accent-2); margin-bottom:8px}
+.dTitle{font-size:19px; font-weight:700; letter-spacing:-.015em; margin:0; line-height:1.25}
+.dClose{position:absolute; top:16px; right:16px; background:var(--surface-2); border:0;
+        width:28px; height:28px; border-radius:6px; color:var(--ink-2); font-size:15px}
+.dClose:hover{background:var(--raised); color:var(--ink)}
+.dBody{padding:20px 22px 40px; overflow-y:auto}
+.dScore{display:flex; align-items:center; gap:12px; margin-bottom:18px}
+.dScoreN{width:46px;height:46px;border-radius:9px;display:grid;place-items:center;
+         font-size:21px;font-weight:700}
+.dScoreL{font-size:15px; font-weight:650; line-height:1.2}
+.dScoreL small{display:block; font-weight:500; color:var(--ink-3); font-size:12px; margin-top:3px}
+.scaleRow{display:flex; align-items:center; gap:10px; padding:7px 9px; border-radius:6px;
+          font-size:12.5px; color:var(--ink-2)}
+.scaleRow[data-here="true"]{background:var(--surface-2); color:var(--ink); font-weight:600}
+.sSw{width:22px;height:22px;border-radius:5px;display:grid;place-items:center;flex:none;
+     font-size:11.5px;font-weight:700}
+.dLbl{font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+      color:var(--ink-3); margin:22px 0 9px}
+.dP{font-size:13px; color:var(--ink-2); margin:0 0 11px}
+.cmp{display:grid; gap:5px}
+.cmpRow{display:flex; align-items:center; gap:9px; font-size:12.5px; padding:5px 0;
+        border-bottom:1px solid var(--line-soft)}
+.cmpRow span:first-child{flex:1; color:var(--ink-2)}
+.empty{border:1px dashed var(--line); border-radius:var(--r); padding:16px; font-size:12.5px;
+       color:var(--ink-3)}
+.banner{background:#3a2f14; color:#e8cf94; font-size:12px; padding:8px 30px;
+        border-bottom:1px solid #4d3f1c}
+:root[data-theme="light"] .banner{background:#fdf6e8; color:#7a5a10; border-color:#f2e2bd}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail">
+    <div class="brand"><span class="brandDot"></span>
+      <span class="brandT">National Action Plan<small>Regional readiness · Round 1</small></span></div>
+
+    <div class="railGrp">
+      <div class="railLbl">Views</div>
+      <button class="railBtn" data-v="matrix" onclick="setView('matrix')">Score matrix</button>
+      <button class="railBtn" data-v="criteria" onclick="setView('criteria')">Criteria library</button>
+      <button class="railBtn" data-v="method" onclick="setView('method')">Method</button>
+    </div>
+
+    <div class="railGrp" id="railRegions"></div>
+
+    <div class="railFoot">
+      <div class="toggle">
+        <button data-t="dark" onclick="setTheme('dark')">Dark</button>
+        <button data-t="light" onclick="setTheme('light')">Light</button>
+      </div>
+      <div style="margin-top:14px">Concept B — exploration only.</div>
+    </div>
+  </aside>
+
+  <div>
+    <div class="banner"><strong>Concept B</strong> — design exploration. Data is the existing repo data; unscored indicators stay blank.</div>
+    <div class="head">
+      <div>
+        <h1 id="hTitle">Score matrix</h1>
+        <p class="sub" id="hSub"></p>
+      </div>
+    </div>
+    <div class="body" id="body"></div>
+  </div>
+</div>
+
+<div class="tipBox" id="tip"></div>
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <button class="dClose" onclick="closeDrawer()">✕</button>
+  <div id="drawerContent"></div>
+</aside>
+
+<script>
+/* Shared demo data for the scratch concepts.
+   CSC copied verbatim from ../data.js; ROUNDS copied verbatim from ../scores.js.
+   No assessment content is invented here — an indicator absent from a round
+   stays unscored. Regenerate by re-copying both blocks. */
+
+const CSC = [
+  {
+    pillarId: "enabling-infrastructure",
+    pillarTitle: "Enabling Infrastructure",
+    groups: [
+      {
+        groupId: "energy-system",
+        groupTitle: "Energy System",
+        items: [
+          { id: "renewable-energy-generation", title: "Renewables" },
+          { id: "transmission-network", title: "Transmission" },
+          { id: "distribution-network", title: "Distribution" },
+          { id: "energy-storage", title: "Storage" },
+          { id: "hydrogen-network", title: "Hydrogen" },
+          { id: "energy-system-orchestration", title: "Orchestration" },
+        ],
+      },
+      {
+        groupId: "transport-system",
+        groupTitle: "Transport System",
+        items: [
+          { id: "port", title: "Port" },
+          { id: "rail", title: "Rail" },
+          { id: "road", title: "Road" },
+        ],
+      },
+      {
+        groupId: "water-waste",
+        groupTitle: "Water System & Waste Management",
+        items: [
+          { id: "water-and-wastewater", title: "Water & Wastewater" },
+          { id: "solid-waste-resource-recovery", title: "Solid waste" },
+        ],
+      },
+      {
+        groupId: "social-infrastructure",
+        groupTitle: "Social Infrastructure",
+        items: [
+          { id: "housing", title: "Housing" },
+          { id: "health", title: "Health" },
+          { id: "education", title: "Education" },
+        ],
+      },
+      {
+        groupId: "communications-infrastructure",
+        groupTitle: "Communications Infrastructure",
+        items: [{ id: "digital-infrastructure", title: "Digital" }],
+      },
+    ],
+  },
+
+  {
+    pillarId: "industry-capability-capacity",
+    pillarTitle: "Industry Capability & Capacity",
+    groups: [
+      {
+        groupId: "industry-decarbonisation",
+        groupTitle: "Industry Decarbonisation",
+        items: [{ id: "industry-decarbonisation-plans", title: "Decarb plans" }],
+      },
+      {
+        groupId: "workforce-capacity",
+        groupTitle: "Workforce Capacity to Deliver",
+        items: [
+          { id: "existing-workforce-capacity", title: "Existing capacity" },
+          { id: "reskilling-upskilling", title: "Reskilling" },
+        ],
+      },
+      {
+        groupId: "innovation-knowledge",
+        groupTitle: "Innovation & Knowledge Development",
+        items: [
+          { id: "innovation", title: "Innovation" },
+          { id: "commercialisation", title: "Commercialisation" },
+          { id: "knowledge-generation-sharing", title: "Knowledge sharing" },
+        ],
+      },
+      {
+        groupId: "collaboration-ecosystems",
+        groupTitle: "Collaboration & Industrial Ecosystems",
+        items: [
+          { id: "industrial-symbiosis", title: "Symbiosis" },
+          { id: "coordinated-infrastructure-plan", title: "Common user infra" },
+          { id: "supply-chain-resilience", title: "Supply chains" },
+          { id: "international-linkages", title: "International linkages" },
+        ],
+      },
+    ],
+  },
+
+  {
+    pillarId: "policy-governance",
+    pillarTitle: "Policy & Governance",
+    groups: [
+      {
+        groupId: "federal-policy",
+        groupTitle: "Federal Policy",
+        items: [
+          { id: "federal-emissions-commitment", title: "Emissions commitment" },
+          { id: "federal-skills-training", title: "Skills" },
+          { id: "federal-approvals", title: "Approvals" },
+          { id: "federal-investment-framework", title: "Investment framework" },
+          { id: "federal-rd", title: "R&D" },
+          { id: "federal-procurement", title: "Procurement" },
+        ],
+      },
+      {
+        groupId: "state-policy",
+        groupTitle: "State Policy",
+        items: [
+          { id: "state-emissions-commitment", title: "Emissions commitment" },
+          { id: "state-skills-training", title: "Skills" },
+          { id: "state-approvals", title: "Approvals" },
+          { id: "state-investment-framework", title: "Investment framework" },
+          { id: "state-rd", title: "R&D" },
+          { id: "state-procurement", title: "Procurement" },
+        ],
+      },
+      {
+        groupId: "local-government-policy",
+        groupTitle: "Local Government Policy",
+        items: [
+          { id: "lga-decarbonisation-plans", title: "LGA decarb plans" },
+          { id: "regional-adaptation-resilience", title: "Adaptation plan" },
+        ],
+      },
+      {
+        groupId: "governance",
+        groupTitle: "Governance",
+        items: [
+          { id: "regional-coordination", title: "Coordination" },
+          { id: "agency-representation", title: "Agency representation" },
+          { id: "policy-alignment", title: "Policy alignment" },
+        ],
+      },
+    ],
+  },
+
+  {
+    pillarId: "social-acceptance",
+    pillarTitle: "Social Acceptance",
+    groups: [
+      {
+        groupId: "community-benefits-impacts",
+        groupTitle: "Community Benefits & Impacts",
+        items: [
+          { id: "strategic-nature-positive-planning", title: "Land-use planning" },
+          { id: "first-nations-benefit-sharing", title: "First Nations benefits" },
+          { id: "wider-community-benefit-sharing", title: "Community benefits" },
+                  ],
+      },
+      {
+        groupId: "engagement-participation",
+        groupTitle: "Engagement & Participation of Communities",
+        items: [
+          { id: "effective-first-nations-engagement", title: "First Nations engagement" },
+          { id: "effective-community-engagement", title: "Community engagement" },
+              ],
+      },
+    ],
+  },
+
+  {
+    pillarId: "financing-transition",
+    pillarTitle: "Financing the Transition",
+    groups: [
+      {
+        groupId: "investment",
+        groupTitle: "Investment",
+        items: [
+          { id: "public-finance-commitment", title: "Public finance" },
+          { id: "attracting-private-investment", title: "Private investment" },
+        ],
+      },
+      {
+        groupId: "risk-resilience",
+        groupTitle: "Risk & Resilience",
+        items: [{ id: "risk-and-resilience", title: "Risk & resilience" }],
+      },
+    ],
+  },
+];
+
+const ROUNDS = {
+  "hunter-valley": [
+    {
+      "date": "April 2025",
+      "scores": {
+        "renewable-energy-generation": 3,
+        "transmission-network": 2,
+        "distribution-network": 2,
+        "energy-storage": 2,
+        "hydrogen-network": 1,
+        "industry-decarbonisation-plans": 2,
+        "federal-emissions-commitment": 3,
+        "federal-skills-training": 3,
+        "federal-approvals": 3,
+        "federal-investment-framework": 3,
+        "federal-rd": 4,
+        "federal-procurement": 3,
+        "state-emissions-commitment": 3,
+        "state-skills-training": 4,
+        "state-approvals": 3,
+        "state-investment-framework": 3,
+        "state-rd": 3,
+        "state-procurement": 3,
+        "lga-decarbonisation-plans": 2
+      }
+    }
+  ],
+  "gladstone": [
+    {
+      "date": "September 2025",
+      "scores": {
+        "renewable-energy-generation": 3,
+        "transmission-network": 2,
+        "distribution-network": 2,
+        "energy-storage": 3,
+        "hydrogen-network": 2,
+        "industry-decarbonisation-plans": 3,
+        "federal-emissions-commitment": 2,
+        "federal-skills-training": 3,
+        "federal-approvals": 3,
+        "federal-investment-framework": 3,
+        "federal-rd": 4,
+        "federal-procurement": 3,
+        "state-emissions-commitment": 3,
+        "state-skills-training": 3,
+        "state-approvals": 2,
+        "state-investment-framework": 3,
+        "state-rd": 2,
+        "state-procurement": 3,
+        "lga-decarbonisation-plans": 4,
+        "strategic-nature-positive-planning": 3
+      }
+    }
+  ],
+  "port-hedland": [
+    {
+      "date": "August 2026",
+      "scores": {
+        "renewable-energy-generation": 2,
+        "transmission-network": 2,
+        "distribution-network": 2,
+        "energy-storage": 1,
+        "hydrogen-network": 2,
+        "water-and-wastewater": 2,
+        "housing": 2,
+        "industry-decarbonisation-plans": 2,
+        "federal-emissions-commitment": 3,
+        "federal-skills-training": 3,
+        "federal-approvals": 3,
+        "federal-investment-framework": 3,
+        "federal-rd": 4,
+        "federal-procurement": 3,
+        "state-emissions-commitment": 2,
+        "state-skills-training": 3,
+        "state-approvals": 4,
+        "state-investment-framework": 3,
+        "state-rd": 4,
+        "state-procurement": 2,
+        "lga-decarbonisation-plans": 3,
+        "strategic-nature-positive-planning": 2,
+        "wider-community-benefit-sharing": 1,
+        "effective-community-engagement": 2
+      }
+    }
+  ],
+  "kwinana": [
+    {
+      "date": "August 2026",
+      "scores": {
+        "renewable-energy-generation": 2,
+        "transmission-network": 2,
+        "distribution-network": 2,
+        "energy-storage": 3,
+        "hydrogen-network": 2,
+        "water-and-wastewater": 2,
+        "housing": 2,
+        "industry-decarbonisation-plans": 2,
+        "federal-emissions-commitment": 3,
+        "federal-skills-training": 3,
+        "federal-approvals": 3,
+        "federal-investment-framework": 3,
+        "federal-rd": 4,
+        "federal-procurement": 3,
+        "state-emissions-commitment": 2,
+        "state-skills-training": 3,
+        "state-approvals": 4,
+        "state-investment-framework": 3,
+        "state-rd": 4,
+        "state-procurement": 2,
+        "lga-decarbonisation-plans": 2,
+        "strategic-nature-positive-planning": 2,
+        "wider-community-benefit-sharing": 3,
+        "effective-community-engagement": 3
+      }
+    }
+  ]
+};
+
+/* Flatten the newest round per region — the concepts only show one round. */
+const SCORES = Object.fromEntries(
+  Object.entries(ROUNDS).map(([k, rs]) => [k, (rs[0] && rs[0].scores) || {}]));
+const ROUND_DATE = Object.fromEntries(
+  Object.entries(ROUNDS).map(([k, rs]) => [k, (rs[0] && rs[0].date) || null]));
+
+const REGIONS = [
+  {key:"karratha",       name:"Karratha",       state:"WA",  x:23,   y:29},
+  {key:"port-hedland",   name:"Port Hedland",   state:"WA",  x:32,   y:30},
+  {key:"geraldton",      name:"Geraldton",      state:"WA",  x:20,   y:47},
+  {key:"kwinana",        name:"Kwinana",        state:"WA",  x:21,   y:54},
+  {key:"collie",         name:"Collie",         state:"WA",  x:23.5, y:59},
+  {key:"darwin",         name:"Darwin",         state:"NT",  x:47,   y:18},
+  {key:"mt-isa",         name:"Mt Isa",         state:"QLD", x:56,   y:33},
+  {key:"townsville",     name:"Townsville",     state:"QLD", x:69,   y:30},
+  {key:"gladstone",      name:"Gladstone",      state:"QLD", x:73,   y:40},
+  {key:"hunter-valley",  name:"Hunter Valley",  state:"NSW", x:78,   y:54},
+  {key:"port-kembla",    name:"Port Kembla",    state:"NSW", x:77.5, y:59},
+  {key:"whyalla",        name:"Whyalla",        state:"SA",  x:52,   y:59},
+  {key:"geelong",        name:"Geelong",        state:"VIC", x:60,   y:66},
+  {key:"latrobe-valley", name:"Latrobe Valley", state:"VIC", x:69,   y:68},
+  {key:"portland",       name:"Portland",       state:"VIC", x:57,   y:71},
+  {key:"bell-bay",       name:"Bell Bay",       state:"TAS", x:66,   y:77}
+/* status is derived from scores.js, never hand-maintained */
+].map(r => ({...r, round: ROUND_DATE[r.key] || null,
+              status: Object.keys(SCORES[r.key] || {}).length ? "published" : "none"}));
+
+const BANDS = {
+  1:{label:"Severe deficiency"},   2:{label:"Moderate deficiency"},
+  3:{label:"Developing"},          4:{label:"Effective"},
+  5:{label:"Leading practice"}
+};
+
+const STATUS_LABEL = { published:"Assessed", none:"Not yet assessed" };
+function statusText(r){ return r.round ? `Assessed · ${r.round}` : "Not yet assessed"; }
+
+const ALL_ITEMS = CSC.flatMap(p => p.groups.flatMap(g =>
+  g.items.map(i => ({...i, pillarId:p.pillarId, pillarTitle:p.pillarTitle,
+                     groupId:g.groupId, groupTitle:g.groupTitle}))));
+
+function itemById(id){ return ALL_ITEMS.find(i => i.id === id); }
+function scoreFor(region, id){ const s = SCORES[region]; return s ? s[id] : undefined; }
+function coverage(region){
+  const s = SCORES[region] || {};
+  return { scored: Object.keys(s).length, total: ALL_ITEMS.length };
+}
+function pillarSummary(region, pillarId){
+  const ids = ALL_ITEMS.filter(i => i.pillarId === pillarId).map(i => i.id);
+  const vals = ids.map(id => scoreFor(region, id)).filter(v => v !== undefined);
+  return { n: vals.length, total: ids.length,
+           mean: vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null };
+}
+
+
+let state = { view:"matrix", region:null, display:"heatmap", item:null };
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ORDER = {published:0, underway:1, none:2};
+const ACTIVE = REGIONS.filter(r => r.status !== "none")
+  .sort((a,b)=> ORDER[a.status]-ORDER[b.status] || coverage(b.key).scored-coverage(a.key).scored);
+
+function setTheme(t){ document.documentElement.dataset.theme = t;
+  document.querySelectorAll(".toggle button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.t===t)); }
+
+function setView(v, opts){ state = {...state, view:v, ...(opts||{})}; render(); }
+
+/* ---------------- rail ---------------- */
+function renderRail(){
+  $("railRegions").innerHTML = `<div class="railLbl">Regions</div>` +
+    REGIONS.map(r=>{
+      const cov = coverage(r.key);
+      const on = state.view==="region" && state.region===r.key;
+      return `<button class="railBtn" aria-current="${on}" ${r.status==="none"?"disabled style='opacity:.45'":""}
+        onclick="setView('region',{region:'${r.key}'})">
+        <span class="pip" data-s="${r.status}"></span>${esc(r.name)}
+        <span class="tag">${r.status==="none" ? "—" : cov.scored}</span></button>`;
+    }).join("");
+  document.querySelectorAll(".railBtn[data-v]").forEach(b=>
+    b.setAttribute("aria-current", b.dataset.v===state.view));
+}
+
+/* ---------------- cells ---------------- */
+function cell(region,id){
+  const v = scoreFor(region,id) || 0;
+  const rn = (REGIONS.find(r=>r.key===region)||{}).name || region;
+  const it = itemById(id);
+  const tip = v ? `${rn}<br><em>${it.title}</em><br>${v} · ${BANDS[v].label}`
+                : `${rn}<br><em>${it.title}</em><br>Not yet scored`;
+  return `<td class="cell"><button class="cellIn" data-v="${v}"
+    data-tip="${esc(tip)}" onclick="openItem('${id}','${region}')">${v||"·"}</button></td>`;
+}
+
+function legendHTML(){
+  return `<div class="legend"><span>Score</span>
+    ${[1,2,3,4,5].map(v=>`<span><span class="lSw" style="background:var(--v${v});color:var(--v${v}t)">${v}</span>${BANDS[v].label}</span>`).join("")}
+    <span><span class="lSw" style="background:var(--none);color:var(--noneT)">·</span>Not scored</span></div>`;
+}
+
+/* ---------------- matrix view ---------------- */
+function viewMatrix(){
+  const cols = ACTIVE;
+  const dist = [1,2,3,4,5].map(v => ALL_ITEMS.reduce((n,i)=>
+      n + cols.filter(c=>scoreFor(c.key,i.id)===v).length, 0));
+  const max = Math.max(...dist,1);
+  const totalCells = cols.length * ALL_ITEMS.length;
+  const scored = dist.reduce((a,b)=>a+b,0);
+  const low = dist[0]+dist[1];
+
+  const rows = CSC.map(p => `
+    <tr class="pRow"><td colspan="${cols.length+1}">${esc(p.pillarTitle)}</td></tr>
+    ${p.groups.map(g=>`
+      <tr class="gRow"><td colspan="${cols.length+1}">${esc(g.groupTitle)}</td></tr>
+      ${g.items.map(i=>`<tr>
+        <td class="iCell"><button class="iBtn" onclick="openItem('${i.id}','${cols[0].key}')">${esc(i.title)}</button></td>
+        ${cols.map(c=>cell(c.key,i.id)).join("")}
+      </tr>`).join("")}`).join("")}`).join("");
+
+  const tableView = `<div class="mWrap"><table>
+    <thead><tr><th>Indicator</th><th>Theme</th><th>Group</th>${cols.map(c=>`<th class="num">${esc(c.name)}</th>`).join("")}</tr></thead>
+    <tbody>${ALL_ITEMS.map(i=>`<tr>
+      <td class="iCell"><button class="iBtn" onclick="openItem('${i.id}','${cols[0].key}')">${esc(i.title)}</button></td>
+      <td style="padding:9px 10px;font-size:12px;color:var(--ink-3)">${esc(i.pillarTitle)}</td>
+      <td style="padding:9px 10px;font-size:12px;color:var(--ink-3)">${esc(i.groupTitle)}</td>
+      ${cols.map(c=>{const v=scoreFor(c.key,i.id);
+        return `<td style="text-align:center;font-variant-numeric:tabular-nums;font-size:13px">${v? `${v} <span style="color:var(--ink-3);font-size:11px">${BANDS[v].label}</span>`:'<span style="color:var(--ink-3)">—</span>'}</td>`;}).join("")}
+    </tr>`).join("")}</tbody></table></div>`;
+
+  return `
+  <div class="tiles">
+    <div class="tileC"><div class="tileL">Coverage</div>
+      <div class="tileV">${Math.round(scored/totalCells*100)}<small>%</small></div>
+      <div class="progress"><i style="width:${scored/totalCells*100}%"></i></div>
+      <div class="tileM">${scored} of ${totalCells} region–indicator pairs scored</div></div>
+    <div class="tileC"><div class="tileL">Regions in scope</div>
+      <div class="tileV">${REGIONS.length}</div>
+      <div class="tileM">${REGIONS.filter(r=>r.status==="published").length} assessed ·
+        ${REGIONS.filter(r=>r.status==="none").length} not yet assessed</div></div>
+    <div class="tileC"><div class="tileL">Score distribution</div>
+      <div class="bars">${dist.map((n,i)=>`<span class="bar" style="height:${Math.max(4,n/max*34)}px;background:var(--v${i+1})"></span>`).join("")}</div>
+      <div class="barX">${dist.map((n,i)=>`<span>${i+1}</span>`).join("")}</div>
+      <div class="tileM">${dist.join(" · ")} scores at 1–5</div></div>
+    <div class="tileC"><div class="tileL">Flagged as deficient</div>
+      <div class="tileV">${low}</div>
+      <div class="tileM">scores of 1 or 2 across scored indicators</div></div>
+  </div>
+
+  <div class="bar2">
+    <div class="seg">
+      <button aria-pressed="${state.display==="heatmap"}" onclick="setView('matrix',{display:'heatmap'})">Matrix</button>
+      <button aria-pressed="${state.display==="table"}" onclick="setView('matrix',{display:'table'})">Table</button>
+    </div>
+    ${legendHTML()}
+  </div>
+
+  ${state.display==="heatmap"
+    ? `<div class="mWrap"><table><thead><tr><th>Indicator</th>
+        ${cols.map(c=>`<th class="num">${esc(c.name)}</th>`).join("")}</tr></thead>
+        <tbody>${rows}</tbody></table></div>`
+    : tableView}`;
+}
+
+/* ---------------- region view ---------------- */
+function viewRegion(){
+  const r = REGIONS.find(x=>x.key===state.region);
+  const cov = coverage(r.key);
+  const dist = [1,2,3,4,5].map(v=>ALL_ITEMS.filter(i=>scoreFor(r.key,i.id)===v).length);
+  const max = Math.max(...dist,1);
+  return `
+  <div class="tiles">
+    <div class="tileC"><div class="tileL">Status</div>
+      <div class="tileV" style="font-size:18px;letter-spacing:-.01em">${statusText(r)}</div>
+      <div class="tileM">${r.state} · ${r.round||"no round yet"}</div></div>
+    <div class="tileC"><div class="tileL">Indicators scored</div>
+      <div class="tileV">${cov.scored}<small>/${cov.total}</small></div>
+      <div class="progress"><i style="width:${cov.scored/cov.total*100}%"></i></div>
+      <div class="tileM">${cov.total-cov.scored} still to score</div></div>
+    <div class="tileC"><div class="tileL">Score distribution</div>
+      <div class="bars">${dist.map((n,i)=>`<span class="bar" style="height:${Math.max(4,n/max*34)}px;background:var(--v${i+1})"></span>`).join("")}</div>
+      <div class="barX">${dist.map((n,i)=>`<span>${i+1}</span>`).join("")}</div>
+      <div class="tileM">${dist.join(" · ")}</div></div>
+    ${CSC.slice(0,1).map(()=>"").join("")}
+    <div class="tileC"><div class="tileL">Themes started</div>
+      <div class="tileV">${CSC.filter(p=>pillarSummary(r.key,p.pillarId).n>0).length}<small>/${CSC.length}</small></div>
+      <div class="tileM">a theme counts once one indicator is scored</div></div>
+  </div>
+
+  <div class="bar2"><div style="font-size:12.5px;color:var(--ink-3)">
+    Theme averages are calculated from scored indicators only.</div>${legendHTML()}</div>
+
+  <div class="mWrap"><table>
+    <thead><tr><th>Indicator</th><th class="num">Score</th><th style="width:190px">Band</th></tr></thead>
+    <tbody>
+      ${CSC.map(p=>{
+        const s = pillarSummary(r.key,p.pillarId);
+        return `<tr class="pRow"><td colspan="3">${esc(p.pillarTitle)}
+          <span style="float:right;text-transform:none;letter-spacing:0;color:var(--ink-3);font-weight:500">
+          ${s.mean? `mean ${s.mean.toFixed(1)} · ` : ""}${s.n}/${s.total} scored</span></td></tr>
+        ${p.groups.map(g=>`<tr class="gRow"><td colspan="3">${esc(g.groupTitle)}</td></tr>
+          ${g.items.map(i=>{const v=scoreFor(r.key,i.id);
+            return `<tr><td class="iCell"><button class="iBtn" onclick="openItem('${i.id}','${r.key}')">${esc(i.title)}</button></td>
+            ${cell(r.key,i.id)}
+            <td style="padding:9px 12px;font-size:12.5px;color:${v?"var(--ink-2)":"var(--ink-3)"}">${v?BANDS[v].label:"Not yet scored"}</td></tr>`;
+          }).join("")}`).join("")}`;
+      }).join("")}
+    </tbody></table></div>`;
+}
+
+/* ---------------- criteria + method ---------------- */
+function viewCriteria(){
+  return `<div class="mWrap"><table>
+    <thead><tr><th>Indicator</th><th>Theme</th><th>Group</th><th class="num">Regions scored</th></tr></thead>
+    <tbody>${ALL_ITEMS.map(i=>{
+      const n = ACTIVE.filter(c=>scoreFor(c.key,i.id)!==undefined).length;
+      return `<tr>
+        <td class="iCell"><button class="iBtn" onclick="openItem('${i.id}','${ACTIVE[0].key}')">${esc(i.title)}</button></td>
+        <td style="padding:9px 10px;font-size:12px;color:var(--ink-3)">${esc(i.pillarTitle)}</td>
+        <td style="padding:9px 10px;font-size:12px;color:var(--ink-3)">${esc(i.groupTitle)}</td>
+        <td style="text-align:center;font-size:13px;font-variant-numeric:tabular-nums;color:${n?"var(--ink)":"var(--ink-3)"}">${n} / ${ACTIVE.length}</td>
+      </tr>`;}).join("")}</tbody></table></div>`;
+}
+
+function viewMethod(){
+  return `<div class="tiles" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">
+    ${[["01","Gather evidence","Public sources, regional plans and interviews are collected against each indicator."],
+       ["02","Score against the scale","Each indicator is scored 1–5 using its published grading scale."],
+       ["03","Review","Scores and evidence are reviewed by contributors with regional knowledge."],
+       ["04","Publish","The round is published with evidence shown beside every score."]]
+      .map(([n,t,d])=>`<div class="tileC"><div class="tileL">${n}</div>
+        <div style="font-size:16px;font-weight:650;letter-spacing:-.01em;margin-bottom:8px">${t}</div>
+        <div style="font-size:12.5px;color:var(--ink-2)">${d}</div></div>`).join("")}
+  </div>
+  <div class="bar2" style="margin-top:26px"><div style="font-size:12.5px;color:var(--ink-3)">The five-point grading scale is the same for every indicator; the wording of each band is indicator-specific.</div></div>
+  <div class="mWrap" style="padding:16px 18px">
+    ${[1,2,3,4,5].map(n=>`<div class="scaleRow">
+      <span class="sSw" style="background:var(--v${n});color:var(--v${n}t)">${n}</span>
+      ${BANDS[n].label}</div>`).join("")}
+  </div>`;
+}
+
+/* ---------------- drawer ---------------- */
+function openItem(id, region){
+  state.item = {id, region};
+  const it = itemById(id), v = scoreFor(region,id);
+  const rn = (REGIONS.find(r=>r.key===region)||{}).name || region;
+  $("drawerContent").innerHTML = `
+    <div class="dHead">
+      <div class="dKick">${esc(it.pillarTitle)} · ${esc(it.groupTitle)}</div>
+      <h2 class="dTitle">${esc(it.title)}</h2>
+    </div>
+    <div class="dBody">
+      <div class="dScore">
+        <span class="dScoreN" style="background:var(--v${v||"3"});color:var(--v${v||"3"}t);${v?"":"background:var(--none);color:var(--noneT);font-size:16px"}">${v||"·"}</span>
+        <span class="dScoreL">${v?BANDS[v].label:"Not yet scored"}<small>${esc(rn)} · ${(REGIONS.find(x=>x.key===region)||{}).round||"no round"}</small></span>
+      </div>
+      <div class="dLbl">Grading scale</div>
+      ${[1,2,3,4,5].map(n=>`<div class="scaleRow" data-here="${v===n}">
+        <span class="sSw" style="background:var(--v${n});color:var(--v${n}t)">${n}</span>
+        ${BANDS[n].label}${v===n?' <span style="margin-left:auto;font-size:10.5px;letter-spacing:.06em;color:var(--accent-2)">THIS REGION</span>':""}</div>`).join("")}
+      <div class="dLbl">Evidence</div>
+      ${v ? `<p class="dP">The signed-off evidence paragraphs for this indicator would render here,
+        in the order the report sets out and without hyperlinks.</p>
+        <p class="dP">The drawer keeps the matrix in view behind it, so a reviewer can read one
+        indicator's reasoning without losing their place in the grid.</p>`
+          : `<div class="empty">Not scored for ${esc(rn)} yet — no evidence text to show.</div>`}
+      <div class="dLbl">Across regions</div>
+      <div class="cmp">${ACTIVE.map(r=>{const rv=scoreFor(r.key,id);
+        return `<div class="cmpRow"><span>${esc(r.name)}</span>
+          <span class="sSw" style="background:${rv?`var(--v${rv})`:"var(--none)"};color:${rv?`var(--v${rv}t)`:"var(--noneT)"}">${rv||"·"}</span>
+          <span style="width:120px;color:var(--ink-3);font-size:11.5px">${rv?BANDS[rv].label:"not scored"}</span></div>`;
+      }).join("")}</div>
+      <div class="dLbl">Previous rounds</div>
+      <div class="empty">No earlier round recorded. Once round 2 exists this shows both scores and what changed.</div>
+    </div>`;
+  $("drawer").classList.add("on"); $("drawer").setAttribute("aria-hidden","false");
+  $("scrim").classList.add("on");
+}
+function closeDrawer(){ $("drawer").classList.remove("on");
+  $("drawer").setAttribute("aria-hidden","true"); $("scrim").classList.remove("on"); }
+document.addEventListener("keydown", e => { if(e.key==="Escape") closeDrawer(); });
+
+/* ---------------- tooltips ---------------- */
+const tip = $("tip");
+document.addEventListener("mouseover", e => {
+  const t = e.target.closest("[data-tip]");
+  if(!t){ tip.style.display="none"; return; }
+  tip.innerHTML = t.dataset.tip.replace(/^([^<]+)/, "<b>$1</b>");
+  tip.style.display="block";
+  const r = t.getBoundingClientRect();
+  tip.style.left = Math.min(window.innerWidth-260, r.left) + "px";
+  tip.style.top = (r.bottom + 8) + "px";
+});
+document.addEventListener("mouseout", e => { if(e.target.closest("[data-tip]")) tip.style.display="none"; });
+
+/* ---------------- render ---------------- */
+function render(){
+  const v = state.view;
+  const titles = {
+    matrix:["Score matrix","Every indicator against every region with an assessment on foot. Cells carry the number as well as the colour, and the table view shows the same data as text."],
+    region:["","" ],
+    criteria:["Criteria library",`${ALL_ITEMS.length} indicators across ${CSC.length} themes. Coverage shows how many active regions have a score for each.`],
+    method:["Method","The four steps of the Regional Assessment Process, and the shared five-point scale."]
+  };
+  if(v==="region"){
+    const r = REGIONS.find(x=>x.key===state.region);
+    $("hTitle").textContent = r.name;
+    $("hSub").textContent = `${r.state} · ${statusText(r)} · ${coverage(r.key).scored} of ${coverage(r.key).total} indicators scored.`;
+  } else {
+    $("hTitle").textContent = titles[v][0];
+    $("hSub").textContent = titles[v][1];
+  }
+  $("body").innerHTML = v==="matrix" ? viewMatrix()
+    : v==="region" ? viewRegion()
+    : v==="criteria" ? viewCriteria() : viewMethod();
+  renderRail();
+}
+setTheme("dark");
+render();
+</script>
+</body>
+</html>

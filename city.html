@@ -23,6 +23,14 @@
       <select id="roundSelect" style="border:1px solid var(--border); border-radius:999px; padding:5px 14px; font:inherit; font-size:13px; color:var(--text); background:#fff; cursor:pointer;">
         <option value="">— No assessment selected —</option>
       </select>
+      <span id="roundSummary" class="roundSummary"></span>
+    </div>
+
+    <div id="scoreLegend" class="scoreLegend" style="display:none;">
+      <span class="legendKey"><span class="legendSwatch low"></span>1–2 · Low — deficiency</span>
+      <span class="legendKey"><span class="legendSwatch medium"></span>3 · Medium — developing</span>
+      <span class="legendKey"><span class="legendSwatch high"></span>4–5 · High — effective</span>
+      <span class="legendKey"><span class="legendSwatch none"></span>Not yet assessed</span>
     </div>
 
     <div id="grid" class="grid"></div>
@@ -68,20 +76,73 @@
       rounds.forEach((round, i) => {
         const opt = document.createElement("option");
         opt.value = i;
-        opt.textContent = round.date;
+        opt.textContent = round.date + (i === 0 ? " (latest)" : "");
         roundSelect.appendChild(opt);
       });
     }
 
     roundSelect.addEventListener("change", () => {
       const idx = roundSelect.value;
-      renderCSC(idx !== "" ? rounds[+idx].scores : {});
+      const chosen = idx !== "";
+      renderCSC(chosen ? rounds[+idx].scores : {}, chosen);
+      updateSummary(chosen ? rounds[+idx].scores : null);
     });
+
+    // --- Score bands (must match the CSS in styles.css) ---
+    const SCORE_LABELS = {
+      1: "Very low — severe deficiency",
+      2: "Low — moderate deficiency",
+      3: "Medium — developing",
+      4: "High — effective",
+      5: "Very high — fully effective",
+    };
+
+    const BAND_LABELS = { 1: "Low", 2: "Low", 3: "Medium", 4: "High", 5: "High" };
+
+    // --- Summary beside the selector ---
+    const summaryEl = document.getElementById("roundSummary");
+    const legendEl  = document.getElementById("scoreLegend");
+
+    function updateSummary(cityScores) {
+      if (!cityScores) {
+        summaryEl.textContent = "";
+        legendEl.style.display = "none";
+        return;
+      }
+
+      const values = Object.values(cityScores).filter(v => typeof v === "number");
+      const total  = CSC.reduce(
+        (n, pillar) => n + pillar.groups.reduce((m, g) => m + g.items.length, 0), 0
+      );
+
+      legendEl.style.display = "flex";
+
+      if (values.length === 0) {
+        summaryEl.textContent = `No indicators scored in this round`;
+        return;
+      }
+
+      const coverage = `${values.length} of ${total} indicators scored`;
+
+      // A mean over a handful of indicators reads as a regional verdict when
+      // it isn't one, so only show it once the round has real coverage.
+      if (values.length < 5) {
+        summaryEl.textContent = coverage;
+        summaryEl.title = "Too few indicators scored in this round to report a mean.";
+        return;
+      }
+
+      const mean = values.reduce((a, b) => a + b, 0) / values.length;
+      summaryEl.innerHTML =
+        `Mean <strong>${mean.toFixed(1)}</strong> · ${coverage}`;
+      summaryEl.title = "Mean is the average across scored indicators only; "
+        + "unscored indicators are excluded.";
+    }
 
     // --- Render grid ---
     const grid = document.getElementById("grid");
 
-    function renderCSC(cityScores = {}) {
+    function renderCSC(cityScores = {}, assessmentChosen = false) {
       grid.innerHTML = "";
 
       for (const pillar of CSC) {
@@ -111,7 +172,15 @@
             a.href = score
               ? `previous.html?id=${encodeURIComponent(item.id)}&city=${encodeURIComponent(cityKey)}`
               : `criterion.html?id=${encodeURIComponent(item.id)}&city=${encodeURIComponent(cityKey)}`;
-            a.className = "itemLink" + (score ? ` score-${score}` : "");
+            a.className = "itemLink"
+              + (score ? ` score-${score}` : (assessmentChosen ? " score-none" : ""));
+
+            if (score) {
+              a.title = `${item.title} — ${score}: ${SCORE_LABELS[score] || ""}`
+                + ` (${BAND_LABELS[score]} band)`;
+            } else if (assessmentChosen) {
+              a.title = `${item.title} — not yet assessed`;
+            }
 
             const label = document.createElement("span");
             label.textContent = item.title;
@@ -121,6 +190,7 @@
               const badge = document.createElement("span");
               badge.className = "scoreBadge";
               badge.textContent = score;
+              badge.setAttribute("aria-label", `Score ${score} of 5`);
               a.appendChild(badge);
             }
 
@@ -135,7 +205,18 @@
       }
     }
 
-    renderCSC(); // initial render — no assessment selected, all uncoloured
+    // --- Initial render ---
+    // Land on the latest assessment so the grid is coloured the moment you
+    // arrive from the map. "— No assessment selected —" is still there to
+    // strip the colour back off and see the bare criteria structure.
+    if (rounds.length > 0) {
+      roundSelect.value = "0";
+      renderCSC(rounds[0].scores, true);
+      updateSummary(rounds[0].scores);
+    } else {
+      renderCSC();
+      updateSummary(null);
+    }
   </script>
 </body>
 </html>
