@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BZE Assessment Editor</title>
+  <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+  <style>
+    :root {
+      --bg: #eef6fb;
+      --card: #ffffff;
+      --border: #cfdce6;
+      --header: #1f6fa7;
+      --text: #0f2a3a;
+      --muted: #5a7486;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 28px 20px 56px;
+    }
+
+    h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0 0 28px;
+      line-height: 1.5;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--header);
+      margin: 0 0 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Form rows ── */
+    .row {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      margin-bottom: 14px;
+    }
+
+    .row:last-child { margin-bottom: 0; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+
+    label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    select, input[type="text"], input[type="password"] {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 11px;
+      font: inherit;
+      font-size: 13px;
+      color: var(--text);
+      background: #fff;
+      width: 100%;
+    }
+
+    select:focus, input[type="text"]:focus, input[type="password"]:focus {
+      outline: 2px solid var(--header);
+      outline-offset: 1px;
+      border-color: transparent;
+    }
+
+    .field-hint {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .date-pair { display: flex; gap: 8px; }
+    .date-pair select { flex: 1; }
+
+    /* ── Score selector ── */
+    .score-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .score-btn {
+      flex: 1;
+      height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #f7fbff;
+      color: var(--text);
+      transition: transform 80ms;
+    }
+
+    .score-btn:hover { filter: brightness(0.95); }
+    .score-btn:active { transform: scale(0.97); }
+
+    .score-btn.active-1 { background: #7b0000; border-color: #5a0000; color: #fff; }
+    .score-btn.active-2 { background: #c0392b; border-color: #96281b; color: #fff; }
+    .score-btn.active-3 { background: #1a56a8; border-color: #13407e; color: #fff; }
+    .score-btn.active-4 { background: #a8d5a2; border-color: #7ab872; color: #1a3a1a; }
+    .score-btn.active-5 { background: #1e7e34; border-color: #155724; color: #fff; }
+
+    /* ── Grading scale ── */
+    .scale-grid { display: flex; flex-direction: column; gap: 8px; }
+
+    .scale-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .scale-badge {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .b1 { background: #7b0000; color: #fff; }
+    .b2 { background: #c0392b; color: #fff; }
+    .b3 { background: #1a56a8; color: #fff; }
+    .b4 { background: #a8d5a2; color: #1a3a1a; }
+    .b5 { background: #1e7e34; color: #fff; }
+
+    .scale-row input { flex: 1; }
+
+    /* ── Paragraphs ── */
+    .para-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .para-block {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .para-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 12px;
+      background: #f6fbff;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .para-remove {
+      background: none;
+      border: none;
+      color: #c0392b;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding: 0 2px;
+    }
+
+    .para-remove:hover { color: #7b0000; }
+
+    .ql-container { font-size: 13px; }
+    .ql-editor { min-height: 72px; }
+    .ql-toolbar { border-color: var(--border) !important; }
+    .ql-container { border-color: var(--border) !important; }
+
+    .add-para-btn {
+      margin-top: 10px;
+      width: 100%;
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font: inherit;
+      font-size: 13px;
+      color: var(--header);
+      cursor: pointer;
+    }
+
+    .add-para-btn:hover { background: #f0f8ff; border-color: var(--header); }
+
+    /* ── Save button ── */
+    .save-btn {
+      width: 100%;
+      background: var(--header);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 28px;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .save-btn:hover:not(:disabled) { background: #155d8f; }
+    .save-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .save-btn.saving .spinner { display: block; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Status box ── */
+    .status-box {
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
+    .status-box.error {
+      display: block;
+      background: #fdf0f0;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>BZE Assessment Editor</h1>
+  <p class="subtitle">Fill in the details below for a single criterion assessment, then click <strong>Save to GitHub</strong>.<br>
+  The scores and evidence files in the repository will be updated automatically.</p>
+
+  <!-- ── 0. GitHub Settings ────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">GitHub Settings</div>
+    <div class="row">
+      <div class="field">
+        <label for="repoInput">Repository</label>
+        <input type="text" id="repoInput" placeholder="owner/repo" />
+      </div>
+      <div class="field">
+        <label for="branchInput">Branch</label>
+        <input type="text" id="branchInput" placeholder="main" />
+      </div>
+    </div>
+    <div class="row">
+      <div class="field" style="grid-column: 1/-1">
+        <label for="tokenInput">Personal Access Token</label>
+        <input type="password" id="tokenInput" placeholder="ghp_…" autocomplete="off" />
+        <span class="field-hint">Needs <strong>Contents: Read &amp; Write</strong> permission. Saved in your browser's local storage.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 1. Details ───────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">Assessment Details</div>
+    <div class="row">
+      <div class="field">
+        <label for="citySelect">City</label>
+        <select id="citySelect"></select>
+      </div>
+      <div class="field">
+        <label for="indicatorSelect">Indicator</label>
+        <select id="indicatorSelect"></select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Assessment Date</label>
+        <div class="date-pair">
+          <select id="monthSelect"></select>
+          <select id="yearSelect"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Score</label>
+        <div class="score-row" id="scoreRow">
+          <button class="score-btn" data-score="1" onclick="setScore(1)">1</button>
+          <button class="score-btn" data-score="2" onclick="setScore(2)">2</button>
+          <button class="score-btn" data-score="3" onclick="setScore(3)">3</button>
+          <button class="score-btn" data-score="4" onclick="setScore(4)">4</button>
+          <button class="score-btn" data-score="5" onclick="setScore(5)">5</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. Grading Scale ──────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">Indicator Grading Scale</div>
+    <div class="scale-grid" id="scaleGrid"></div>
+  </div>
+
+  <!-- ── 3. Paragraphs ────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">Assessment Paragraphs</div>
+    <div class="para-list" id="paraList"></div>
+    <button class="add-para-btn" onclick="addParagraph()">+ Add paragraph</button>
+  </div>
+
+  <!-- ── Save ─────────────────────────────────────────────────────────── -->
+  <div class="status-box" id="statusBox"></div>
+  <button class="save-btn" id="saveBtn" onclick="saveToGitHub()">
+    <span class="spinner"></span>
+    <span id="saveBtnLabel">Save to GitHub</span>
+  </button>
+
+</div><!-- /container -->
+
+<script src="data.js"></script>
+<script>
+
+// ── City labels ────────────────────────────────────────────────────────────
+
+const CITY_LABELS = {
+  "karratha":       "Karratha",
+  "port-hedland":   "Port Hedland",
+  "darwin":         "Darwin",
+  "geraldton":      "Geraldton",
+  "kwinana":        "Kwinana",
+  "collie":         "Collie",
+  "whyalla":        "Whyalla",
+  "mt-isa":         "Mt Isa",
+  "townsville":     "Townsville",
+  "gladstone":      "Gladstone",
+  "hunter-valley":  "Hunter Valley",
+  "port-kembla":    "Illawarra",
+  "geelong":        "Geelong",
+  "latrobe-valley": "Latrobe Valley",
+  "portland":       "Portland",
+  "bell-bay":       "Bell Bay",
+};
+
+const MONTHS = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December",
+];
+
+// ── Grading scale defaults ─────────────────────────────────────────────────
+
+const SUPPORT = [
+  "Minimal support (Severe Deficiency).",
+  "Basic support (Moderate Deficiency).",
+  "Moderate support (Developing).",
+  "Strong support (Effective).",
+  "Exemplary support (Leading Practice).",
+];
+
+const COMMITMENT = [
+  "Minimal commitment (Severe Deficiency).",
+  "Basic commitment (Moderate Deficiency).",
+  "Moderate commitment (Developing).",
+  "Strong commitment (Effective).",
+  "Exemplary commitment (Leading Practice).",
+];
+
+const GRADING_SCALES = {
+  "renewable-energy-generation": [
+    "Poor progress towards 2035 requirements. Less than 25% of required capacity is in development, with 15% or less approved and 10% or less in construction or operating.",
+    "Improving progress towards 2035 requirements. Between 25% and 50% of required capacity is in development, with 15–40% approved and 10–25% in construction or operating.",
+    "Moderate progress towards 2035 requirements. Between 50% and 75% of required capacity is in development, with 40–60% approved and 25–40% in construction or operating.",
+    "Strong progress towards 2035 requirements. Between 75% and 100% of required capacity is in development, with 60–85% approved and 40–50% in construction or operating.",
+    "Exemplary progress towards 2035 requirements. More than 100% of required capacity is in development, with over 85% approved and over 50% in construction or operating.",
+  ],
+  "transmission-network": [
+    "Minimal planning. Transmission tracking to meet approximately 25–50% of industrial demand.",
+    "Basic planning. Transmission tracking to meet more than 50% of industrial demand.",
+    "Moderate planning. Transmission tracking to meet electrification of existing industry and up to 20% additional demand.",
+    "Strong planning. Transmission on track for 100% electrification of existing industry and 20–50% additional demand for new green industries.",
+    "Exemplary planning. Transmission on track for 100% of needs of existing and new entrant industries.",
+  ],
+  "distribution-network": [
+    "No electrification plans, including at the household level.",
+    "Limited electrification planning. Planning for modest consumer energy resource (CER) uptake, but no industry electrification.",
+    "Moderate electrification planning. Planning for high CER uptake, but no industry electrification.",
+    "Strong electrification planning. Planning for 100% CER and modest industry electrification.",
+    "Exemplary electrification planning. Planning for 100% CER, high industry electrification and capacity for new entrants.",
+  ],
+  "energy-storage": [
+    "Poor progress towards 2035 storage requirements. Less than 25% of required capacity/depth is in development, with 15% or less approved and 10% or less in construction or operating.",
+    "Improving progress towards 2035 storage requirements. Between 25% and 50% of required capacity/depth is in development, with 15–40% approved and 10–25% in construction or operating.",
+    "Moderate progress towards 2035 storage requirements. Between 50% and 75% of required capacity/depth is in development, with 40–60% approved and 25–40% in construction or operating.",
+    "Strong progress towards 2035 storage requirements. Between 75% and 100% of required capacity/depth is in development, with 60–85% approved and 40–50% in construction or operating.",
+    "Exemplary progress towards 2035 storage requirements. Over 100% of required capacity/depth is in development, with more than 85% approved and more than 50% in construction or operating.",
+  ],
+  "hydrogen-network": [
+    "Underinvestment. Projects likely to deliver only a small amount of green hydrogen by 2035.",
+    "Underinvestment. Projects likely to deliver a modest amount of green hydrogen by 2035.",
+    "Investment in place for a high amount of green hydrogen by 2035.",
+    "Projects expected to come online 2030–35, meeting approximately 50% of Green Energy Exports requirements.",
+    "Projects expected to come online 2030–35, meeting 100% of Green Energy Exports requirements.",
+  ],
+  "housing": [
+    "Critical gap. Severe shortfall of workforce accommodation with no funded delivery mechanism.",
+    "Material gap. Significant shortfall of accommodation capacity relative to project pipeline demand, with no binding legacy commitment or coordinated strategy.",
+    "Developing. Some accommodation strategy in place but shortfalls remain and legacy conversion commitments are limited.",
+    "Strong. Accommodation supply broadly matching pipeline demand, with funded legacy conversion commitments.",
+    "Exemplary. Purpose-built accommodation fully meeting demand, with binding legacy conversion and community housing outcomes secured.",
+  ],
+  "industry-decarbonisation-plans": [
+    "Most companies have plans with no targets and/or not funded (Limited Plan/Insufficient Targets).",
+    "Most companies have plans with targets, but only some are aligned to 75% emissions reduction by 2035 and not all commitments are funded (Basic Plans/Uncertain Implementation Pathways).",
+    "Most companies have plans with targets, and most are aligned to 75% emissions reduction by 2035 and are funded (Intermediate Plans/Developing Momentum).",
+    "All major companies have plans with targets aligned with 75% emissions reduction by 2035, with commitments funded but no internal performance initiatives (Comprehensive Plans/Aligned with Regional Goals).",
+    "All major companies have plans aligned with 75% emissions reduction by 2035, are fully funded and have internal performance initiatives (Leading Practice/Exemplary Industry Leadership).",
+  ],
+  "federal-emissions-commitment": COMMITMENT,
+  "federal-skills-training":       SUPPORT,
+  "federal-approvals":              SUPPORT,
+  "federal-investment-framework":   SUPPORT,
+  "federal-rd":                     SUPPORT,
+  "federal-procurement":            SUPPORT,
+  "state-emissions-commitment":     COMMITMENT,
+  "state-skills-training":          SUPPORT,
+  "state-approvals":                SUPPORT,
+  "state-investment-framework":     SUPPORT,
+  "state-rd":                       SUPPORT,
+  "state-procurement":              SUPPORT,
+  "lga-decarbonisation-plans": [
+    "Minimal Plan (Severe Deficiency).",
+    "Basic Plan (Moderate Deficiency).",
+    "Moderate Plan (Developing).",
+    "Strong Plan (Effective).",
+    "Exemplary Plan (Leading Practice).",
+  ],
+  "strategic-nature-positive-planning": [
+    "Minimal level of planning (Severe Deficiency).",
+    "Basic level of planning (Moderate Deficiency).",
+    "Moderate level of planning (Developing).",
+    "Strong level of planning (Effective).",
+    "Exemplary level of planning (Leading Practice).",
+  ],
+  "wider-community-benefit-sharing": [
+    "Minimal level of community benefits (Severe Deficiency).",
+    "Basic level of community benefits (Moderate Deficiency).",
+    "Moderate level of community benefits (Developing).",
+    "Strong level of community benefits (Effective).",
+    "Exemplary level of community benefits (Leading Practice).",
+  ],
+  "effective-community-engagement": [
+    "Minimal level of communication and engagement (Severe Deficiency).",
+    "Basic level of communication and engagement (Moderate Deficiency).",
+    "Moderate level of communication and engagement (Developing).",
+    "Strong level of communication and engagement (Effective).",
+    "Exemplary level of communication and engagement (Leading Practice).",
+  ],
+};
+
+// ── State ──────────────────────────────────────────────────────────────────
+
+let selectedScore = null;
+let paraSeq = 0;
+let quilts = []; // { id, quill }
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+
+function init() {
+  // Cities
+  const cityEl = document.getElementById("citySelect");
+  for (const [key, label] of Object.entries(CITY_LABELS)) {
+    const o = document.createElement("option");
+    o.value = key; o.textContent = label;
+    cityEl.appendChild(o);
+  }
+
+  // Indicators (grouped by pillar → group)
+  const indEl = document.getElementById("indicatorSelect");
+  for (const pillar of CSC) {
+    for (const group of pillar.groups) {
+      const og = document.createElement("optgroup");
+      og.label = `${pillar.pillarTitle} › ${group.groupTitle}`;
+      for (const item of group.items) {
+        const o = document.createElement("option");
+        o.value = item.id; o.textContent = item.title;
+        og.appendChild(o);
+      }
+      indEl.appendChild(og);
+    }
+  }
+  indEl.addEventListener("change", refreshScale);
+
+  // Months
+  const monthEl = document.getElementById("monthSelect");
+  MONTHS.forEach((m, i) => {
+    const o = document.createElement("option");
+    o.value = m; o.textContent = m;
+    if (i === new Date().getMonth()) o.selected = true;
+    monthEl.appendChild(o);
+  });
+
+  // Years (current + 5)
+  const yearEl = document.getElementById("yearSelect");
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear; y <= thisYear + 5; y++) {
+    const o = document.createElement("option");
+    o.value = y; o.textContent = y;
+    yearEl.appendChild(o);
+  }
+
+  refreshScale();
+  addParagraph();
+  loadSettings();
+}
+
+// ── Score buttons ──────────────────────────────────────────────────────────
+
+function setScore(n) {
+  selectedScore = n;
+  document.querySelectorAll(".score-btn").forEach(btn => {
+    const s = +btn.dataset.score;
+    btn.className = "score-btn" + (s === n ? ` active-${s}` : "");
+  });
+}
+
+// ── Grading scale ──────────────────────────────────────────────────────────
+
+function refreshScale() {
+  const id = document.getElementById("indicatorSelect").value;
+  const defaults = GRADING_SCALES[id] || ["", "", "", "", ""];
+  const grid = document.getElementById("scaleGrid");
+  grid.innerHTML = "";
+  for (let i = 1; i <= 5; i++) {
+    const row = document.createElement("div");
+    row.className = "scale-row";
+    row.innerHTML = `
+      <div class="scale-badge b${i}">${i}</div>
+      <input type="text" id="scale${i}" value="${escHtml(defaults[i - 1] || "")}"
+             placeholder="Description for score ${i}" />
+    `;
+    grid.appendChild(row);
+  }
+}
+
+// ── Paragraphs ─────────────────────────────────────────────────────────────
+
+function addParagraph() {
+  const qid = `q${++paraSeq}`;
+  const list = document.getElementById("paraList");
+  const num  = list.children.length + 1;
+
+  const block = document.createElement("div");
+  block.className = "para-block";
+  block.dataset.qid = qid;
+  block.innerHTML = `
+    <div class="para-head">
+      <span>Paragraph ${num}</span>
+      <button class="para-remove" title="Remove paragraph" onclick="removeParagraph(this)">×</button>
+    </div>
+    <div id="${qid}"></div>
+  `;
+  list.appendChild(block);
+
+  const q = new Quill(`#${qid}`, {
+    theme: "snow",
+    modules: {
+      toolbar: [
+        ["bold", "italic"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["link"],
+        ["clean"],
+      ],
+    },
+  });
+  quilts.push({ id: qid, quill: q });
+  renumber();
+}
+
+function removeParagraph(btn) {
+  const block = btn.closest(".para-block");
+  quilts = quilts.filter(q => q.id !== block.dataset.qid);
+  block.remove();
+  renumber();
+}
+
+function renumber() {
+  document.querySelectorAll(".para-block").forEach((b, i) => {
+    b.querySelector(".para-head span").textContent = `Paragraph ${i + 1}`;
+  });
+}
+
+// ── GitHub Settings ────────────────────────────────────────────────────────
+
+function loadSettings() {
+  document.getElementById("repoInput").value   = localStorage.getItem("ghRepo")   || "mattmckee-BZE/National-Action-Plan";
+  document.getElementById("branchInput").value = localStorage.getItem("ghBranch") || "main";
+  document.getElementById("tokenInput").value  = localStorage.getItem("ghToken")  || "";
+}
+
+function saveSettings() {
+  localStorage.setItem("ghRepo",   document.getElementById("repoInput").value.trim());
+  localStorage.setItem("ghBranch", document.getElementById("branchInput").value.trim());
+  localStorage.setItem("ghToken",  document.getElementById("tokenInput").value.trim());
+}
+
+function getSettings() {
+  const repo  = document.getElementById("repoInput").value.trim();
+  const slash = repo.indexOf("/");
+  return {
+    owner:  slash >= 0 ? repo.slice(0, slash) : repo,
+    repo:   slash >= 0 ? repo.slice(slash + 1) : repo,
+    branch: document.getElementById("branchInput").value.trim() || "main",
+    token:  document.getElementById("tokenInput").value.trim(),
+  };
+}
+
+// ── Base64 helpers (UTF-8 safe) ────────────────────────────────────────────
+
+function b64Decode(b64) {
+  const bytes = Uint8Array.from(atob(b64.replace(/\s/g, "")), c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function b64Encode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  bytes.forEach(b => (bin += String.fromCharCode(b)));
+  return btoa(bin);
+}
+
+// ── GitHub Contents API ────────────────────────────────────────────────────
+
+async function ghGet(path) {
+  const { owner, repo, branch, token } = getSettings();
+  const res = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`,
+    { headers: { Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json" } }
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`GitHub ${res.status}: ${body}`);
+  }
+  return res.json();
+}
+
+async function ghPut(path, content, sha, message) {
+  const { owner, repo, branch, token } = getSettings();
+  const payload = { message, content: b64Encode(content), branch };
+  if (sha) payload.sha = sha;
+  const res = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `token ${token}`,
+        Accept: "application/vnd.github.v3+json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`GitHub ${res.status}: ${body}`);
+  }
+  return res.json();
+}
+
+// ── Parse & serialize JS data files ───────────────────────────────────────
+
+function parseScores(js) {
+  const objPart = js
+    .replace(/^[\s\S]*?\bSCORES\s*=\s*/, "")
+    .replace(/;\s*$/, "")
+    .trim();
+  return new Function(`"use strict"; return (${objPart});`)();
+}
+
+function parseEvidence(js) {
+  const fakeWindow = {};
+  new Function("window", `"use strict"; ${js}`)(fakeWindow);
+  return fakeWindow.CITY_EVIDENCE || {};
+}
+
+const SCORES_HEADER =
+`// scores.js — Assessment scores per city, organised by round.
+//
+// Each city maps to an array of rounds (newest first). Each round has a
+// human-readable date and a scores object: item IDs (from data.js) → 1–5.
+// Omit an indicator to leave its box unscored.
+
+`;
+
+function serializeScores(data) {
+  return SCORES_HEADER + "const SCORES = " + JSON.stringify(data, null, 2) + ";\n";
+}
+
+function serializeEvidence(data) {
+  return "window.CITY_EVIDENCE = " + JSON.stringify(data, null, 2) + ";\n";
+}
+
+// ── Merge helpers ──────────────────────────────────────────────────────────
+
+function mergeScore(scores, cityKey, date, indId, score) {
+  if (!scores[cityKey]) scores[cityKey] = [];
+  const rounds = scores[cityKey];
+  const idx = rounds.findIndex(r => r.date === date);
+  if (idx >= 0) {
+    rounds[idx].scores[indId] = score;
+  } else {
+    rounds.unshift({ date, scores: { [indId]: score } });
+  }
+}
+
+function mergeEvidence(evidence, indId, date, score, paragraphs) {
+  if (!evidence[indId]) evidence[indId] = [];
+  const rounds = evidence[indId];
+  const idx = rounds.findIndex(r => r.date === date);
+  if (idx >= 0) {
+    rounds[idx] = { date, score, paragraphs };
+  } else {
+    rounds.unshift({ date, score, paragraphs });
+  }
+}
+
+// ── Save to GitHub ─────────────────────────────────────────────────────────
+
+async function saveToGitHub() {
+  hideStatus();
+
+  const { token, owner, repo } = getSettings();
+  if (!owner || !repo || !token) {
+    showStatus("error", "Please fill in the GitHub repository and personal access token.");
+    return;
+  }
+
+  const cityKey = document.getElementById("citySelect").value;
+  const indId   = document.getElementById("indicatorSelect").value;
+  const month   = document.getElementById("monthSelect").value;
+  const year    = document.getElementById("yearSelect").value;
+  const date    = `${month} ${year}`;
+
+  if (!selectedScore) {
+    showStatus("error", "Please select a score (1–5).");
+    return;
+  }
+
+  // Build grading scale HTML
+  const scaleItems = [];
+  for (let i = 1; i <= 5; i++) {
+    const txt = document.getElementById(`scale${i}`).value.trim();
+    scaleItems.push(`<li><strong>${i}</strong> – ${txt}</li>`);
+  }
+  const scaleHtml =
+    `<strong>Indicator grading scale</strong>` +
+    `<ul class="bulletList" style="margin-top:6px">${scaleItems.join("")}</ul>`;
+
+  // Collect Quill paragraphs (skip empty)
+  const paragraphs = [scaleHtml];
+  for (const { quill } of quilts) {
+    const raw = quill.root.innerHTML.trim();
+    if (!raw || raw === "<p><br></p>") continue;
+    paragraphs.push(normaliseQuillHtml(raw));
+  }
+
+  if (paragraphs.length < 2) {
+    showStatus("error", "Please add at least one assessment paragraph.");
+    return;
+  }
+
+  saveSettings();
+  setSaving(true);
+
+  try {
+    // ── 1. scores.js ──
+    const scoresFile = await ghGet("scores.js");
+    if (!scoresFile) throw new Error("scores.js was not found in the repository. Check the repo and branch settings.");
+    const scores = parseScores(b64Decode(scoresFile.content));
+    mergeScore(scores, cityKey, date, indId, selectedScore);
+    await ghPut("scores.js", serializeScores(scores), scoresFile.sha,
+      `Update score: ${cityKey} / ${indId} (${date})`);
+
+    // ── 2. evidence-{city}.js ──
+    const evPath = `evidence-${cityKey}.js`;
+    const evFile = await ghGet(evPath);
+    const evidence = evFile ? parseEvidence(b64Decode(evFile.content)) : {};
+    mergeEvidence(evidence, indId, date, selectedScore, paragraphs);
+    await ghPut(evPath, serializeEvidence(evidence), evFile ? evFile.sha : undefined,
+      `Update evidence: ${cityKey} / ${indId} (${date})`);
+
+    showStatus("success",
+      `Saved successfully. <strong>${CITY_LABELS[cityKey]}</strong> — ` +
+      `<em>${indId}</em> scored <strong>${selectedScore}</strong> for <strong>${date}</strong>. ` +
+      `Two commits pushed to <code>${document.getElementById("branchInput").value.trim() || "main"}</code>.`
+    );
+  } catch (err) {
+    showStatus("error", "Save failed: " + err.message);
+  } finally {
+    setSaving(false);
+  }
+}
+
+// ── UI helpers ─────────────────────────────────────────────────────────────
+
+function setSaving(active) {
+  const btn = document.getElementById("saveBtn");
+  const lbl = document.getElementById("saveBtnLabel");
+  btn.disabled = active;
+  btn.classList.toggle("saving", active);
+  lbl.textContent = active ? "Saving…" : "Save to GitHub";
+}
+
+function showStatus(type, html) {
+  const box = document.getElementById("statusBox");
+  box.className = `status-box ${type}`;
+  box.innerHTML = html;
+  box.scrollIntoView({ behavior: "smooth" });
+}
+
+function hideStatus() {
+  const box = document.getElementById("statusBox");
+  box.className = "status-box";
+  box.innerHTML = "";
+}
+
+function escHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+// If a Quill block is a single plain <p>…</p>, unwrap it so previous.html
+// applies its sectionText class. Lists and multi-block HTML stay as-is.
+function normaliseQuillHtml(html) {
+  const trimmed = html.trim();
+  if (trimmed.startsWith("<p>") && trimmed.endsWith("</p>")) {
+    const inner = trimmed.slice(3, -4);
+    if (!/<(p|ul|ol|li|blockquote|div|h[1-6])[>\s]/i.test(inner)) {
+      return inner;
+    }
+  }
+  return trimmed;
+}
+
+// ── Start ──────────────────────────────────────────────────────────────────
+init();
+
+</script>
+</body>
+</html>

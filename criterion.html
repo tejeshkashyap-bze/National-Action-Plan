@@ -22,7 +22,7 @@
   const city = params.get("city") || "";
 
   const backLink = document.getElementById("backLink");
-  backLink.href = city ? `city.html?city=${encodeURIComponent(city)}` : "city.html";
+  backLink.href = city ? `city.html?city=${encodeURIComponent(city)}` : "CSC.html";
 
   const content = document.getElementById("content");
 
@@ -45,10 +45,7 @@
 
       const qp = `id=${encodeURIComponent(id)}${city ? `&city=${encodeURIComponent(city)}` : ""}`;
 
-      const learnPage =
-        id === "wider-community-benefit-sharing"
-          ? `learn-wider-community-benefits-sharing.html?${qp}`
-          : `learn.html?${qp}`;
+      const learnPage = `learn.html?${qp}`;
 
       const assessPage =
         id === "wider-community-benefit-sharing"
@@ -65,19 +62,14 @@
           </div>
 
           <div class="actionGrid">
-            <a class="actionCard" href="previous.html?${qp}">
-              <div class="actionTitle">See previous assessments</div>
-              <div class="actionDesc">View earlier assessment history for this indicator in the selected city.</div>
-            </a>
-
             <a class="actionCard" href="${learnPage}">
-              <div class="actionTitle">Learn more about this indicator</div>
+              <div class="actionTitle">See the Methodology</div>
               <div class="actionDesc">Read the framework, data sources, scoring guidance and tables.</div>
             </a>
 
-            <a class="actionCard" href="${assessPage}">
-              <div class="actionTitle">Do your own assessment</div>
-              <div class="actionDesc">Start a guided assessment workflow for this city and indicator.</div>
+            <a class="actionCard" href="previous.html?${qp}">
+              <div class="actionTitle">See previous assessments</div>
+              <div class="actionDesc">View earlier assessment history for this indicator in the selected city.</div>
             </a>
           </div>
         </div>

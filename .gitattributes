@@ -1,0 +1,21 @@
+# Line endings
+#
+# The repo stores LF and checkouts get LF, on every machine. Without this,
+# editing on Windows silently rewrites whole files to CRLF and every commit
+# looks like it changed all 7,000 lines — which makes review impossible and
+# guarantees merge conflicts between collaborators.
+#
+# If your working copy is already CRLF, fix the index in place with:
+#   git add --renormalize .
+# (that only rewrites git's index, not your files)
+
+* text=auto eol=lf
+
+# Binary assets — never transform these
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary

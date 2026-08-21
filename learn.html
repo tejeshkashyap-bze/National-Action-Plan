@@ -16,13 +16,16 @@
   </div>
 
   <script src="data.js"></script>
+  <script src="learn-data.js"></script>
   <script>
     const params = new URLSearchParams(location.search);
-    const id = params.get("id");
-    const city = params.get("city") || "";
+    const id     = params.get("id");
+    const city   = params.get("city") || "";
 
     const backLink = document.getElementById("backLink");
-    backLink.href = `criterion.html?id=${encodeURIComponent(id || "")}${city ? `&city=${encodeURIComponent(city)}` : ""}`;
+    backLink.href = city
+      ? `criterion.html?id=${encodeURIComponent(id || "")}&city=${encodeURIComponent(city)}`
+      : "CSC.html";
 
     const content = document.getElementById("content");
 
@@ -37,114 +40,154 @@
       if (!found) {
         content.innerHTML = `<div class="detailCard">
           <h2 class="detailTitle">Not found</h2>
-          <div class="meta">Couldn’t find a criterion with id: <code>${id}</code></div>
+          <div class="meta">Couldn't find a criterion with id: <code>${id}</code></div>
         </div>`;
       } else {
         const { pillar, group, item } = found;
         document.title = `${item.title} – Learn more`;
 
-        content.innerHTML = `
-          <div class="detailCard">
-            <div class="note">${pillar.pillarTitle} • ${group.groupTitle}</div>
-            <h2 class="detailTitle">${item.title}</h2>
+        const data = (typeof LEARN_DATA !== "undefined") ? LEARN_DATA[id] : null;
 
-            <hr class="sectionDivider" />
-
-            <section class="section">
-              <h3 class="sectionTitle">Purpose of the Assessment</h3>
-              <p class="sectionText">
-                Placeholder: Describe why this criterion is being assessed, what decision it supports,
-                and who the primary users of the result are.
-              </p>
-              <p class="sectionText">
-                Placeholder: Define the assessment scope (geography, timeframe, lifecycle stage) and any assumptions.
-              </p>
-            </section>
-
-            <section class="section">
-              <h3 class="sectionTitle">Assessment Framework</h3>
-              <p class="sectionText">
-                Placeholder: Explain the framework used (readiness scale, maturity model, risk lens, etc.).
-              </p>
-              <p class="sectionText">
-                Placeholder: Describe how it aligns with the broader CSC set and how to interpret it.
-              </p>
-            </section>
-
-            <section class="section">
-              <h3 class="sectionTitle">Data Sources</h3>
-              <ul class="bulletList">
-                <li>Placeholder: Data source #1</li>
-                <li>Placeholder: Data source #2</li>
-                <li>Placeholder: Data source #3</li>
-                <li>Placeholder: Data source #4</li>
-              </ul>
-            </section>
-
-            <section class="section">
-              <h3 class="sectionTitle">Scoring Process</h3>
-              <ol class="numberedList">
-                <li>Placeholder: Define the unit of analysis and confirm boundary conditions.</li>
-                <li>Placeholder: Collect and validate required inputs from the listed data sources.</li>
-                <li>Placeholder: Apply the assessment framework to translate inputs into sub-scores.</li>
-                <li>Placeholder: Review sub-scores with stakeholders / internal QA.</li>
-                <li>Placeholder: Finalise the score and document rationale + evidence.</li>
-              </ol>
-            </section>
-
-            <section class="section">
-              <h3 class="sectionTitle">Weighting Table</h3>
-              <div class="tableWrap">
-                <table class="dataTable" aria-label="Weighting table">
-                  <thead>
-                    <tr>
-                      <th>Category</th>
-                      <th>Factor A</th>
-                      <th>Factor B</th>
-                      <th>Factor C</th>
-                      <th>Factor D</th>
-                      <th>Factor E</th>
-                      <th>Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>Row 1</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Placeholder</td></tr>
-                    <tr><td>Row 2</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Placeholder</td></tr>
-                    <tr><td>Row 3</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Placeholder</td></tr>
-                    <tr><td>Row 4</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Placeholder</td></tr>
-                    <tr><td>Row 5</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Placeholder</td></tr>
-                    <tr><td>Row 6</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Placeholder</td></tr>
-                    <tr><td>Row 7</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>Placeholder</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section class="section">
-              <h3 class="sectionTitle">Scoring Description</h3>
-              <div class="tableWrap">
-                <table class="dataTable" aria-label="Scoring description table">
-                  <thead>
-                    <tr>
-                      <th>Score</th>
-                      <th>Description</th>
-                      <th>Evidence / Examples</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr><td>0</td><td>Placeholder: Definition of score 0.</td><td>Placeholder: Evidence for 0.</td></tr>
-                    <tr><td>1</td><td>Placeholder: Definition of score 1.</td><td>Placeholder: Evidence for 1.</td></tr>
-                    <tr><td>2</td><td>Placeholder: Definition of score 2.</td><td>Placeholder: Evidence for 2.</td></tr>
-                    <tr><td>3</td><td>Placeholder: Definition of score 3.</td><td>Placeholder: Evidence for 3.</td></tr>
-                    <tr><td>4</td><td>Placeholder: Definition of score 4.</td><td>Placeholder: Evidence for 4.</td></tr>
-                    <tr><td>5</td><td>Placeholder: Definition of score 5.</td><td>Placeholder: Evidence for 5.</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          </div>
-        `;
+        if (!data) {
+          content.innerHTML = `
+            <div class="detailCard">
+              <div class="note">${pillar.pillarTitle} • ${group.groupTitle}</div>
+              <h2 class="detailTitle">${item.title}</h2>
+              <hr class="sectionDivider" />
+              <section class="section">
+                <p class="sectionText" style="color:#888; font-style:italic;">
+                  Detailed content for this indicator is coming soon.
+                  To contribute content, edit the <code>learn-data.js</code> file and add an entry for <code>"${id}"</code>.
+                </p>
+              </section>
+            </div>
+          `;
+        } else {
+          content.innerHTML = renderLearnPage(pillar, group, item, data);
+        }
       }
+    }
+
+    // ── Renderer ──────────────────────────────────────────────────────────────
+
+    function renderLearnPage(pillar, group, item, data) {
+      const sections = [];
+
+      // Purpose
+      if (data.purpose) {
+        sections.push(`
+          <section class="section">
+            <h3 class="sectionTitle">Purpose of the Assessment</h3>
+            <p class="sectionText">${data.purpose}</p>
+          </section>
+        `);
+      }
+
+      // Assessment Framework
+      if (data.frameworkIntro || (data.frameworkItems && data.frameworkItems.length)) {
+        const bullets = (data.frameworkItems || [])
+          .map(f => `<li>${f}</li>`).join("");
+        sections.push(`
+          <section class="section">
+            <h3 class="sectionTitle">Assessment Framework</h3>
+            ${data.frameworkIntro ? `<p class="sectionText">${data.frameworkIntro}</p>` : ""}
+            ${bullets ? `<ul class="bulletList">${bullets}</ul>` : ""}
+          </section>
+        `);
+      }
+
+      // Data Sources
+      if (data.dataSources && data.dataSources.length) {
+        const items = data.dataSources.map(s => `<li>${s}</li>`).join("");
+        sections.push(`
+          <section class="section">
+            <h3 class="sectionTitle">Data Sources</h3>
+            <ul class="bulletList">${items}</ul>
+          </section>
+        `);
+      }
+
+      // Scoring Process
+      if (data.scoringProcess && data.scoringProcess.length) {
+        const steps = data.scoringProcess
+          .map(s => `<li><b>${s.label}:</b> ${s.desc}</li>`)
+          .join("");
+        sections.push(`
+          <section class="section">
+            <h3 class="sectionTitle">Scoring Process</h3>
+            <ol class="numberedList">${steps}</ol>
+          </section>
+        `);
+      }
+
+      // Weighting Table
+      if (data.weightingTable && data.weightingTable.length) {
+        const rows = data.weightingTable.map(dim => `
+          <tr>
+            <td>${dim.dimension}</td>
+            <td>${dim.weight}</td>
+            ${(dim.scores || []).map(s => `<td>${s}</td>`).join("")}
+          </tr>
+        `).join("");
+        sections.push(`
+          <section class="section">
+            <h3 class="sectionTitle">Weighting Table</h3>
+            <div class="tableWrap">
+              <table class="dataTable" aria-label="Weighting table">
+                <thead>
+                  <tr>
+                    <th>Dimension</th>
+                    <th>Weight</th>
+                    <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+                  </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+          </section>
+        `);
+      }
+
+      // Scoring Descriptions
+      if (data.scoringDescriptions && data.scoringDescriptions.length) {
+        const rows = data.scoringDescriptions.map(s => {
+          const bullets = (s.characteristics || [])
+            .map(c => `<li>${c}</li>`).join("");
+          return `
+            <tr>
+              <td>${s.score}</td>
+              <td>${s.label}</td>
+              <td>${bullets ? `<ul class="cellList">${bullets}</ul>` : ""}</td>
+            </tr>
+          `;
+        }).join("");
+        sections.push(`
+          <section class="section">
+            <h3 class="sectionTitle">Scoring Description</h3>
+            <div class="tableWrap">
+              <table class="dataTable" aria-label="Scoring description table">
+                <thead>
+                  <tr>
+                    <th>Score</th>
+                    <th>Description</th>
+                    <th>Key Characteristics</th>
+                  </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+          </section>
+        `);
+      }
+
+      return `
+        <div class="detailCard">
+          <div class="note">${pillar.pillarTitle} • ${group.groupTitle}</div>
+          <h2 class="detailTitle">${item.title}</h2>
+          <hr class="sectionDivider" />
+          ${sections.join("")}
+        </div>
+      `;
     }
   </script>
 </body>

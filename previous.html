@@ -16,34 +16,98 @@
   </div>
 
   <script src="data.js"></script>
+  <script src="scores.js"></script>
   <script>
-    const params = new URLSearchParams(location.search);
-    const id = params.get("id");
-    const city = params.get("city") || "";
+    const params   = new URLSearchParams(location.search);
+    const id       = params.get("id");
+    const cityKey  = params.get("city") || "";
 
-    const found = id ? findItemById(id) : null;
+    const found    = id ? findItemById(id) : null;
+    const pillar   = found?.pillar;
+    const group    = found?.group;
+    const item     = found?.item;
 
     const backLink = document.getElementById("backLink");
-    backLink.href = `criterion.html?id=${encodeURIComponent(id || "")}${city ? `&city=${encodeURIComponent(city)}` : ""}`;
+    backLink.href  = `criterion.html?id=${encodeURIComponent(id || "")}${cityKey ? `&city=${encodeURIComponent(cityKey)}` : ""}`;
 
     function prettyCity(s) {
       if (!s) return "this city";
       return s.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
     }
 
-    const cityName = prettyCity(city);
-    const indicatorName = found?.item?.title || "this indicator";
+    const cityName      = prettyCity(cityKey);
+    const indicatorName = item?.title || "this indicator";
+    const content       = document.getElementById("content");
 
-    const content = document.getElementById("content");
-    content.innerHTML = `
-      <div class="detailCard">
-        <div class="note">Previous assessments</div>
-        <h2 class="detailTitle">${indicatorName}</h2>
-        <div class="placeholder" style="margin-top:14px;">
-          There are no previous assessments for this indicator in <strong>${cityName}</strong>.
+    // Score colour label map
+    const SCORE_LABELS = {
+      1: "Severe Deficiency",
+      2: "Moderate Deficiency",
+      3: "Developing",
+      4: "Effective",
+      5: "Leading Practice",
+    };
+
+    function render(evidenceData) {
+      const rounds = evidenceData?.[id] || [];
+
+      const breadcrumb = (pillar && group)
+        ? `<div class="note">${pillar.pillarTitle} • ${group.groupTitle} • ${cityName}</div>`
+        : `<div class="note">${cityName}</div>`;
+
+      if (!rounds.length) {
+        content.innerHTML = `
+          <div class="detailCard">
+            ${breadcrumb}
+            <h2 class="detailTitle">${indicatorName}</h2>
+            <p class="sectionText" style="margin-top:14px; color:#888; font-style:italic;">
+              No assessments have been recorded yet for this indicator in ${cityName}.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      const roundsHtml = rounds.map((round, i) => {
+        const label = SCORE_LABELS[round.score] || "";
+        const paras = (round.paragraphs || []).map(p =>
+          p.startsWith("<") ? p : `<p class="sectionText">${p}</p>`
+        ).join("");
+        const isLatest = i === 0;
+        return `
+          <section class="section">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+              <span class="itemLink score-${round.score}" style="display:inline-flex; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600; pointer-events:none; text-decoration:none;">
+                <span>${label}</span>
+                <span class="scoreBadge">${round.score}</span>
+              </span>
+              <span style="color:#666; font-size:13px;">${round.date}${isLatest ? " <em>(latest)</em>" : ""}</span>
+            </div>
+            ${paras}
+          </section>
+        `;
+      }).join('<hr class="sectionDivider" />');
+
+      content.innerHTML = `
+        <div class="detailCard">
+          ${breadcrumb}
+          <h2 class="detailTitle">${indicatorName}</h2>
+          <hr class="sectionDivider" />
+          ${roundsHtml}
         </div>
-      </div>
-    `;
+      `;
+    }
+
+    // Dynamically load the city-specific evidence file, then render
+    if (cityKey) {
+      const script   = document.createElement("script");
+      script.src     = `evidence-${cityKey}.js`;
+      script.onload  = () => render(window.CITY_EVIDENCE);
+      script.onerror = () => render(null);
+      document.head.appendChild(script);
+    } else {
+      render(null);
+    }
   </script>
 </body>
 </html>

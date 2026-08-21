@@ -11,6 +11,15 @@
   --header: #1f6fa7;
   --text: #0f2a3a;
   --muted: #5a7486;
+
+  /* Score bands — simplified traffic light. See "SCORE COLOURS" below. */
+  --band-low:            #c0392b;   /* scores 1–2 */
+  --band-low-border:     #96281b;
+  --band-medium:         #f0a93b;   /* score 3    */
+  --band-medium-border:  #cf8a1d;
+  --band-medium-text:    #40290a;
+  --band-high:           #1e7e34;   /* scores 4–5 */
+  --band-high-border:    #155724;
 }
 
 /* ---------- Global Reset ---------- */
@@ -31,7 +40,21 @@ body {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 20px 48px;
+  padding: 20px 20px 28px;
+}
+
+/* =========================================================
+   CSC PAGE TOPBAR
+   ========================================================= */
+
+.topbar {
+  margin-bottom: 14px;
+}
+
+.topbar h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px;
 }
 
 /* =========================================================
@@ -160,13 +183,13 @@ body {
 
 .pillarTitle {
   font-weight: 700;
-  padding: 12px 14px;
+  padding: 7px 12px;
   font-size: 15px;
   border-bottom: 1px solid var(--border);
 }
 
 .group {
-  margin: 14px;
+  margin: 8px;
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
@@ -176,23 +199,26 @@ body {
   background: var(--header);
   color: white;
   font-weight: 700;
-  padding: 10px 12px;
+  padding: 5px 10px;
   font-size: 13px;
 }
 
 .items {
-  padding: 10px 12px 12px;
+  padding: 4px 8px 6px;
   display: grid;
-  gap: 8px;
+  gap: 4px;
 }
 
 .itemLink {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   text-decoration: none;
   color: var(--text);
   background: #f7fbff;
   border: 1px solid #d8e6f1;
-  padding: 9px 11px;
+  padding: 5px 9px;
   border-radius: 12px;
   font-size: 13px;
   transition: transform 120ms ease, box-shadow 120ms ease;
@@ -201,6 +227,132 @@ body {
 .itemLink:hover {
   transform: translateY(-1px);
   box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+}
+
+/* =========================================================
+   SCORE COLOURS — simplified traffic light
+   ---------------------------------------------------------
+   Scores 1–5 are grouped into three bands so the grid reads
+   at a glance. The numeral stays visible in every scored box,
+   so the 1-vs-2 and 4-vs-5 detail is never lost.
+
+     1–2  low       red     — deficiency, action needed
+      3   medium    amber   — developing
+     4–5  high      green   — effective
+
+   Change a band here and it updates the criteria grid, the
+   indicator history on previous.html and the legend.
+   ========================================================= */
+
+.itemLink.score-1,
+.itemLink.score-2 {
+  background: var(--band-low);
+  border-color: var(--band-low-border);
+  color: #fff;
+}
+
+.itemLink.score-3 {
+  background: var(--band-medium);
+  border-color: var(--band-medium-border);
+  color: var(--band-medium-text);
+}
+
+.itemLink.score-4,
+.itemLink.score-5 {
+  background: var(--band-high);
+  border-color: var(--band-high-border);
+  color: #fff;
+}
+
+/* Assessed, but this indicator has no score yet — recedes so the
+   scored boxes carry the eye. Only applied once a round is chosen. */
+.itemLink.score-none {
+  background: #f2f6f9;
+  border-color: #dde7ee;
+  border-style: dashed;
+  color: var(--muted);
+}
+
+/* Score badge (numeral shown inside scored boxes) */
+.scoreBadge {
+  flex-shrink: 0;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.itemLink.score-3 .scoreBadge {
+  background: rgba(0, 0, 0, 0.16);
+}
+
+/* =========================================================
+   SCORE LEGEND (city page)
+   ========================================================= */
+
+.scoreLegend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-bottom: 16px;
+}
+
+.legendKey {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.legendSwatch {
+  width: 26px;
+  height: 16px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+.legendSwatch.low {
+  background: var(--band-low);
+  border-color: var(--band-low-border);
+}
+
+.legendSwatch.medium {
+  background: var(--band-medium);
+  border-color: var(--band-medium-border);
+}
+
+.legendSwatch.high {
+  background: var(--band-high);
+  border-color: var(--band-high-border);
+}
+
+.legendSwatch.none {
+  background: #f2f6f9;
+  border: 1px dashed #c3d3de;
+}
+
+/* Mean score / coverage summary beside the selector */
+.roundSummary {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.roundSummary strong {
+  color: var(--text);
+  font-size: 13px;
 }
 
 /* =========================================================
